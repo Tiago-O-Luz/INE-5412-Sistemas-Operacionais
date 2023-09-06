@@ -29,7 +29,7 @@ class Process {
     
     public:
         Process(int id, int crt, int d, int p) {
-            state = State::Created;
+            state = State::Destruction;
             pid = id;
             creation_time = crt;
             duration = d;
@@ -50,6 +50,10 @@ class Process {
         int GetDuration() {
             return duration;
         }
+
+        int GetExecutedTime () {
+            return executed_time;
+        }
         
         int GetStaticPriority() {
             return static_priority;
@@ -61,6 +65,10 @@ class Process {
 
         State GetState() {
             return state;
+        }
+
+        void IncreaseExecutedTime() {
+            executed_time++;
         }
 
         void SetConclusionTime(int c_time) {

@@ -22,9 +22,10 @@ class ProcessControlBlock {
         }
 
         ProcessContext GetProcessContext(int pid) {
-            map<int, ProcessContext>::iterator it;
-            it = process_context_dict.find(pid);
-            return it->second;
+            // map<int, ProcessContext>::iterator it;
+            // it = process_context_dict.find(pid);
+            // return it->second;
+            return process_context_dict[pid];
         }
 
         void AddProcessContext(int pid, int64_t pc) {

@@ -3,6 +3,8 @@
 #include <string>
 #include <vector>
 
+#ifndef PROCESS_PARAMS
+#define PROCESS_PARAMS
 
 using namespace std;
 
@@ -99,3 +101,4 @@ private:
 
 // }
 
+#endif

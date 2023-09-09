@@ -50,9 +50,13 @@ class Process {
 
         int GetDynamicPriority();
 
+        int GetQuantumTime();
+
         State GetState();
 
         void IncreaseExecutedTime();
+
+        void IncreaseQuantumTime();
 
         void SetConclusionTime(int c_time);
 
@@ -65,6 +69,8 @@ class Process {
         void SetBlockedState();
 
         void SetDestructionState();
+
+        void SetQuantumTime(int quantum);
 };
 
 #endif

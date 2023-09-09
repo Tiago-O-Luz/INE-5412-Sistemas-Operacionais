@@ -18,7 +18,7 @@ OperationalSystem::~OperationalSystem() {
 }
 
 void OperationalSystem::Run() {
-    while (scheduler->GetTimeLapsed() < 30) {
+    while (true) {   // scheduler->GetTimeLapsed() < 30
         cout << "Current Time: " << scheduler->GetTimeLapsed() << "\n";
 
         for (auto & process : scheduler->GetProcessesList()) {
@@ -43,6 +43,7 @@ void OperationalSystem::Run() {
         if (!scheduler->GetProcessesQueue().empty()) {
             cpu->RunProcess();
             scheduler->GetProcessesQueue().front()->IncreaseExecutedTime();
+            scheduler->GetProcessesQueue().front()->IncreaseQuantumTime();
         } else {
             break;
         }

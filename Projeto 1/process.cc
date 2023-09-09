@@ -38,6 +38,10 @@ int Process::GetDynamicPriority() {
     return dynamic_priority;
 }
 
+int Process::GetQuantumTime() {
+    return quantum_time;
+}
+
 Process::State Process::GetState() {
     return state;
 }
@@ -68,4 +72,12 @@ void Process::SetBlockedState() {
 
 void Process::SetDestructionState() {
     state = State::Destruction;
+}
+
+void Process::SetQuantumTime(int quantum) {
+    quantum_time = quantum;
+}
+
+void Process::IncreaseQuantumTime() {
+    quantum_time++;
 }

@@ -31,26 +31,34 @@ void Scheduler::CreateNewProcesses() {
 }
 
 // Add to queue logic (FCFS as default)
-void Scheduler::AddToQueue(Process *process) {
-        processes_queue.push_back(process);
-        process->SetReadyState();
+void Scheduler::AddToQueue(Process *process) {              // MUDAR AQUI DEPOIS
+    processes_queue.push_back(process);
+    process->SetReadyState();
 }
 
 // Updates the queue using the scheduler method (FCFS as default)
 // Returns bool true if process changed
-bool Scheduler::UpdateQueue() {
+bool Scheduler::UpdateQueue() {                             // MUDAR AQUI DEPOIS
     // Scheduler method
     int pid = processes_queue.front()->GetPid();
+    // cout << (processes_list[pid]->GetExecutedTime() >= 2) << "\n";
     if (processes_list[pid]->GetExecutedTime() >= processes_list[pid]->GetDuration()) {
         processes_queue.erase(processes_queue.begin());
         processes_list[pid]->SetDestructionState();
         processes_list[pid]->SetConclusionTime(time_lapsed);
         cout << "process " << pid << " finished" << "\n";
         if (!processes_queue.empty()) return true;
-    }
+    } else if (processes_list[pid]->GetQuantumTime() >= 2) {
+        cout << "chegou aqui" << pid << "\n";
+        processes_queue.push_back(processes_queue.front());
+
+        processes_queue.erase(processes_queue.begin());
+        processes_list[pid]->SetReadyState();
+        processes_list[pid]->SetQuantumTime(0);
+
+    } 
     return false;
 }
-
 ProcessControlBlock Scheduler::GetProcessControlBLock() {
     return process_context_block;
 }

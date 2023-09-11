@@ -2,6 +2,7 @@
 
 #include "scheduler.h"
 
+#define QUANTUM 2
 
 #ifndef ROUNDROBIN_SCHEDULER
 #define ROUNDROBIN_SCHEDULER
@@ -17,9 +18,11 @@ public:
 
     ~RoundRobinScheduler();
 
-    void AddToQueue(Process *process);
+    // Specific Round Robin add to queue logic
+    void doAddToQueue(Process *process);
 
-    bool UpdateQueue();
+    // Specific Round Robin update queue logic
+    bool doUpdateQueue();
 
 };
 

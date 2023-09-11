@@ -12,6 +12,7 @@ Process::Process(int id, int crt, int d, int p) {
     dynamic_priority = p;
     executed_time = 0;
     quantum_time = 0;
+    context_changes_count = 0;
 }
 
 int Process::GetPid() {
@@ -30,6 +31,10 @@ int Process::GetExecutedTime () {
     return executed_time;
 }
 
+int Process::GetConclusionTime () {
+    return conclusion_time;
+}
+
 int Process::GetStaticPriority() {
     return static_priority;
 }
@@ -42,12 +47,20 @@ int Process::GetQuantumTime() {
     return quantum_time;
 }
 
-Process::State Process::GetState() {
+int Process::GetContextChangesCount() {
+    return context_changes_count;
+}
+
+State Process::GetState() {
     return state;
 }
 
 void Process::IncreaseExecutedTime() {
     executed_time++;
+}
+
+void Process::IncreaseContextChangesCount() {
+    context_changes_count++;
 }
 
 void Process::SetConclusionTime(int c_time) {

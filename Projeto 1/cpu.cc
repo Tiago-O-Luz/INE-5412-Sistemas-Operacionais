@@ -24,11 +24,11 @@ ProcessContext Cpu::ContextChange(ProcessContext context) {
 
 void Cpu::RunProcess() {
     // Changes context to simulate program running
-    program_counter += (rand() % 10 + 1);
-    stack_pointer += ((rand() % 16 + 1) * 4) - 8*4;
+    program_counter += (rand() % 10 + 1); // Random increase of pc
+    stack_pointer += ((rand() % 16 + 1) * 4) - 8*4; // Random increase or decrease of sp
+    // Random number for registers
     for (int i = 0; i < NUMBER_OF_REGISTERS; i++) {
         reg[i] = rand();
     }
-    std::cout << program_counter << "\n";
 }
 

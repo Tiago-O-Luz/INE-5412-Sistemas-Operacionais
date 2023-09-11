@@ -6,7 +6,7 @@ SJFScheduler::SJFScheduler(vector<ProcessParams *> p_parameters) : Scheduler(p_p
 
 SJFScheduler::~SJFScheduler() {}
 
-void SJFScheduler::AddToQueue(Process *process)
+void SJFScheduler::doAddToQueue(Process *process)
 {
     if (processes_queue.empty()) {
         processes_queue.push_back(process);
@@ -15,32 +15,29 @@ void SJFScheduler::AddToQueue(Process *process)
         std::vector<Process *>::iterator it = processes_queue.begin();
         int duration = process->GetDuration();
 
-        // Encontrar a posição correta para inserção
+        // Find correct position to insert process
         while (it != processes_queue.end() && (*it)->GetDuration() < duration) {
             ++it;
         }
 
-        // Inserir o processo na posição correta
+        // If is shortest job sets at second position (Prevents preemption before current process finishes)
+        if (it == processes_queue.begin() && processes_queue.front()->GetState() == State::InExecution) it++;
         processes_queue.insert(it, process);
         process->SetReadyState();
-
     }
 }
 
-bool SJFScheduler::UpdateQueue()
+bool SJFScheduler::doUpdateQueue()
 {
-    // Scheduler method
     int pid = processes_queue.front()->GetPid();
-    cout << (processes_list[pid]->GetExecutedTime() >= processes_list[pid]->GetDuration()) << "\n";
-    if (processes_list[pid]->GetExecutedTime() >= processes_list[pid]->GetDuration())
-    {
+    if (processes_list[pid]->GetExecutedTime() >= processes_list[pid]->GetDuration()) {
+        // Process has finished (executed time = duration)
         processes_queue.erase(processes_queue.begin());
         processes_list[pid]->SetDestructionState();
         processes_list[pid]->SetConclusionTime(time_lapsed);
-        cout << "process " << pid << " finished"
-             << "\n";
-        if (!processes_queue.empty())
-            return true;
+        if (!processes_queue.empty()) return true;
     }
+    // If first process on queue not in execution
+    if (processes_queue.front()->GetState() == State::Ready) return true;
     return false;
 }

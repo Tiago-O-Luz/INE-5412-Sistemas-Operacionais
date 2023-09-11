@@ -12,6 +12,7 @@
 using namespace std;
 
 
+// Store and management of process contexts
 class ProcessControlBlock {
     private:
         // Maps pid to process context
@@ -24,7 +25,7 @@ class ProcessControlBlock {
 
         void AddProcessContext(int pid, int64_t pc);
 
-        void SetProcessContext(int pid, int64_t r[NUMBER_OF_REGISTERS], int64_t sp, int64_t pc);
+        void SetProcessContext(int pid, ProcessContext context);
 
 };
 

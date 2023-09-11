@@ -13,6 +13,7 @@ Scheduler::Scheduler(vector<ProcessParams *> p_parameters) {
 }
 
 Scheduler::~Scheduler() {
+    // Deletes processes and clear list and queue
     for (auto & process : processes_list) {
         delete process.second;
     }
@@ -21,44 +22,32 @@ Scheduler::~Scheduler() {
 }
 
 void Scheduler::CreateNewProcesses() {
-    for (auto & p : process_params) {    
+    for (auto & p : process_params) { 
+        // For each process_params creates a process with pid = highest pid   
         highest_pid++;
         Process *process = new Process(highest_pid, p->get_creation_time(), p->get_duration(), p->get_priority());
 
+        // Creates process context
         process_context_block.AddProcessContext(process->GetPid(), 0);
+
+        // Stores process in map
         processes_list[process->GetPid()] = process;
     }
 }
 
-// Add to queue logic (FCFS as default)
-void Scheduler::AddToQueue(Process *process) {              // MUDAR AQUI DEPOIS
-    processes_queue.push_back(process);
-    process->SetReadyState();
+// Calls add to queue logic implemented by child class
+void Scheduler::AddToQueue(Process *process) {
+    doAddToQueue(process);
 }
 
-// Updates the queue using the scheduler method (FCFS as default)
+// Calls update queue logic implemented by child class
 // Returns bool true if process changed
-bool Scheduler::UpdateQueue() {                             // MUDAR AQUI DEPOIS
-    // Scheduler method
-    int pid = processes_queue.front()->GetPid();
-    // cout << (processes_list[pid]->GetExecutedTime() >= 2) << "\n";
-    if (processes_list[pid]->GetExecutedTime() >= processes_list[pid]->GetDuration()) {
-        processes_queue.erase(processes_queue.begin());
-        processes_list[pid]->SetDestructionState();
-        processes_list[pid]->SetConclusionTime(time_lapsed);
-        cout << "process " << pid << " finished" << "\n";
-        if (!processes_queue.empty()) return true;
-    } else if (processes_list[pid]->GetQuantumTime() >= 2) {
-        cout << "chegou aqui" << pid << "\n";
-        processes_queue.push_back(processes_queue.front());
-
-        processes_queue.erase(processes_queue.begin());
-        processes_list[pid]->SetReadyState();
-        processes_list[pid]->SetQuantumTime(0);
-
-    } 
-    return false;
+bool Scheduler::UpdateQueue() {
+    if (!processes_queue.empty()) {
+        doUpdateQueue();
+    }
 }
+
 ProcessControlBlock Scheduler::GetProcessControlBLock() {
     return process_context_block;
 }
@@ -82,32 +71,11 @@ int Scheduler::GetTimeLapsed() {
 void Scheduler::IncreaseTimeLapsed() {
     time_lapsed++;
 }
-// void Run() {
-//     while (time_lapsed < 30) {
-//         cout << "Current Time: " << time_lapsed << "\n";
 
-//         for (auto & process : processes_list) {
-//             if (process.second->GetCreationTime() == time_lapsed) {
-//                 // If process is created in current timestamp creates (Set to created state) and add to queue
-//                 process.second->SetCreatedState();
-//                 cout << "Process " << process.first << " created at timestamp " << time_lapsed << "s\n";
-//                 AddToQueue(process.second);
-//             }
-//         }
+int Scheduler::GetCreatedProcess() {
+    return created_process;
+}
 
-//         if (UpdateQueue()) {
-//             processes_queue.front()->SetInExecutionState();
-//             int pid = processes_queue.front()->GetPid();
-//             cpu->ContextChange(process_context_block.GetProcessContext(pid));
-//             cout << "process " << pid << " started" << "\n";
-//         }
-
-//         if (!processes_queue.empty()) {
-//             cpu->RunProcess();
-//             processes_queue.front()->IncreaseExecutedTime();
-//         } else {
-//             break;
-//         }
-//         time_lapsed++;
-//     }
-// }
+void Scheduler::IncreaseCreatedProcess() {
+    created_process++;
+}

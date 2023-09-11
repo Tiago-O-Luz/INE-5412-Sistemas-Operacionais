@@ -10,21 +10,22 @@
 #define NUMBER_OF_REGISTERS 6
 
 
+// Process context info
 struct ProcessContext {
     int64_t reg[NUMBER_OF_REGISTERS];
     int64_t stack_pointer;
     int64_t program_counter;
 };
 
+// Process possible states
+enum class State {
+    Created, Ready, InExecution, Blocked, Destruction
+};
 
 class Process {
 
-    enum class State {
-        Created, Ready, InExecution, Blocked, Destruction
-    };
-
     private:
-        State state;
+        State state; // Starts at Destruction until creation_time
         int pid;
         int creation_time;
 	    int duration; //seconds
@@ -33,6 +34,7 @@ class Process {
         int quantum_time;
 	    int static_priority;
 	    int dynamic_priority;
+        int context_changes_count;
     
     public:
         
@@ -45,6 +47,8 @@ class Process {
         int GetDuration();
 
         int GetExecutedTime ();
+
+        int GetConclusionTime();
         
         int GetStaticPriority();
 
@@ -52,11 +56,15 @@ class Process {
 
         int GetQuantumTime();
 
+        int GetContextChangesCount();
+
         State GetState();
 
         void IncreaseExecutedTime();
 
         void IncreaseQuantumTime();
+
+        void IncreaseContextChangesCount();
 
         void SetConclusionTime(int c_time);
 

@@ -1,14 +1,14 @@
 
-#include "priority_scheduler.h"
+#include "preempted_priority_scheduler.h"
 #include <vector>
 
-PriorityScheduler::PriorityScheduler(vector<ProcessParams *> p_parameters) : Scheduler(p_parameters) {
+PreemptedPriorityScheduler::PreemptedPriorityScheduler(vector<ProcessParams *> p_parameters) : Scheduler(p_parameters) {
 
 };
 
-PriorityScheduler::~PriorityScheduler() {}
+PreemptedPriorityScheduler::~PreemptedPriorityScheduler() {}
 
-void PriorityScheduler::doAddToQueue(Process *process) {
+void PreemptedPriorityScheduler::doAddToQueue(Process *process) {
     if (processes_queue.empty()) {
         processes_queue.push_back(process);
         process->SetReadyState();
@@ -21,15 +21,18 @@ void PriorityScheduler::doAddToQueue(Process *process) {
             it++;
         }
 
-        // If is highest priority job sets at second position (Prevents preemption before current process finishes)
-        if (it == processes_queue.begin() && processes_queue.front()->GetState() == State::InExecution) it++;
+        // If is highest priority job sets at second position and there is as process executing (stops current process for preemption)
+        if (it == processes_queue.begin() && processes_queue.front()->GetState() == State::InExecution) {
+            processes_queue.front()->SetReadyState();
+        }
         processes_queue.insert(it, process);
         process->SetReadyState();
     }
 }
 
-bool PriorityScheduler::doUpdateQueue() {
+bool PreemptedPriorityScheduler::doUpdateQueue() {
     int pid = processes_queue.front()->GetPid();
+    
     if (processes_list[pid]->GetExecutedTime() >= processes_list[pid]->GetDuration()) {
         // Process has finished (executed time = duration)
         processes_queue.erase(processes_queue.begin());

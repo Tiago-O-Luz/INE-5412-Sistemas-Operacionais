@@ -17,9 +17,11 @@ public:
 
     ~SJFScheduler();
 
-    void AddToQueue(Process *process);
+    // Specific SJF add to queue logic
+    void doAddToQueue(Process *process) override;
 
-    bool UpdateQueue();
+    // Specific SJF updated queue logic
+    bool doUpdateQueue();
 
 };
 

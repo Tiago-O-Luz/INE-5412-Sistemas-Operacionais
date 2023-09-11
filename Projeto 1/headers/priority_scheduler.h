@@ -13,9 +13,11 @@ public:
 
     ~PriorityScheduler();
 
-    void AddToQueue(Process *process);
+    // Specific Priority add to queue logic
+    void doAddToQueue(Process *process);
 
-    bool UpdateQueue();
+    // Specific Priority update queue logic
+    bool doUpdateQueue();
 };
 
 #endif

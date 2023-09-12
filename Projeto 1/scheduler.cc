@@ -28,7 +28,7 @@ void Scheduler::CreateNewProcesses() {
         Process *process = new Process(highest_pid, p->get_creation_time(), p->get_duration(), p->get_priority());
 
         // Creates process context
-        process_context_block.AddProcessContext(process->GetPid(), 0);
+        process_control_block.AddProcessContext(process->GetPid(), 0);
 
         // Stores process in map
         processes_list[process->GetPid()] = process;
@@ -49,7 +49,7 @@ bool Scheduler::UpdateQueue() {
 }
 
 ProcessControlBlock Scheduler::GetProcessControlBLock() {
-    return process_context_block;
+    return process_control_block;
 }
 
 vector<ProcessParams *> Scheduler::GetProcessParams() {

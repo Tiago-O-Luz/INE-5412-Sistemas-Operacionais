@@ -18,7 +18,7 @@ class Scheduler
     virtual bool doUpdateQueue() {}
 
     protected:
-        ProcessControlBlock process_context_block; // Process context
+        ProcessControlBlock process_control_block; // Process context
         vector<ProcessParams *> process_params; // Received process data for simulation
         map<int, Process *> processes_list; // Dictionary that stores (pid,process)
         vector<Process *> processes_queue; // Process queue of execution

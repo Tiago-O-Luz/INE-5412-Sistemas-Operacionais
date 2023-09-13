@@ -61,7 +61,7 @@ void OperationalSystem::Run() {
         scheduler->IncreaseTimeLapsed();
     }
     // Prints simulation statistics
-    PrintProcessesStats();
+    PrintStats();
 }
 
 // Changes scheduler algorithm
@@ -97,7 +97,7 @@ void OperationalSystem::PrintProcessesStates() {
     cout << "\n";
 }
 
-void OperationalSystem::PrintProcessesStats() {
+void OperationalSystem::PrintStats() {
     // Calculate and print: turnaround time (TA), wait time (WT), context changes (CC)
     float avg_turnaround = 0;
     float avg_wait_time = 0;

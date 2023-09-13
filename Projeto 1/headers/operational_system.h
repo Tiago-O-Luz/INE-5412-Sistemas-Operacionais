@@ -28,7 +28,7 @@ class OperationalSystem {
         // Print information functions:
         void PrintProcessesStates();
 
-        void PrintProcessesStats();
+        void PrintStats();
 };
 
 

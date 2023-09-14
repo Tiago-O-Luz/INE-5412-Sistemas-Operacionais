@@ -26,12 +26,15 @@ void OperationalSystem::Run() {
     cout << "\n";
 
     while (true) {
-        for (auto & process : scheduler->GetProcessesList()) {
-            if (process.second->GetCreationTime() == scheduler->GetTimeLapsed()) {
-                // If process creation time equals current timestamp creates (Set to created state) and add to queue
-                process.second->SetCreatedState();
-                scheduler->IncreaseCreatedProcess();
-                scheduler->AddToQueue(process.second);
+        if (scheduler->GetCreatedProcess() < scheduler->GetProcessesList().size()) {
+            // If there are still processes to be created
+            for (auto & process : scheduler->GetProcessesList()) {
+                if (process.second->GetCreationTime() == scheduler->GetTimeLapsed()) {
+                    // If process creation time equals current timestamp creates (Set to created state) and add to queue
+                    process.second->SetCreatedState();
+                    scheduler->IncreaseCreatedProcess();
+                    scheduler->AddToQueue(process.second);
+                }
             }
         }
         

@@ -6,6 +6,7 @@
 Scheduler::Scheduler(vector<ProcessParams *> p_parameters) {
     time_lapsed = 0;
     highest_pid = 0;
+    created_process = 0;
     process_params = p_parameters;
 
     // Creates process objects

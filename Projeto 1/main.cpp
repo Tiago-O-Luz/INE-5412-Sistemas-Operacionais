@@ -7,12 +7,15 @@
 #include "preempted_priority_scheduler.h"
 #include "round_robin_scheduler.h"
 
+#include <chrono>
+
 int main()
 {
+    // auto start = chrono::steady_clock::now();
     // Read file
     File f;
-	f.read_file();
-	f.print_processes_params();
+    f.read_file();
+    f.print_processes_params();
 
     // Allocates cpu and scheduler methods
     Cpu *cpu = new Cpu();
@@ -44,10 +47,14 @@ int main()
     os.ChangeSchedulerMethod(pr_priority_scheduler);
     cout << "\nPreemted Priority:\n";
     os.Run();
-    
+
     // Round Robin
     os.ChangeSchedulerMethod(round_robin_scheduler);
     cout << "\nRound Robin:\n";
     os.Run();
 
+    // auto end = chrono::steady_clock::now();
+    // cout << "Elapsed time in microseconds: "
+    //      << chrono::duration_cast<chrono::microseconds>(end - start).count()
+    //      << " µs" << endl;
 }

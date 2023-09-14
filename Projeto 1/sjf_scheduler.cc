@@ -13,11 +13,12 @@ void SJFScheduler::doAddToQueue(Process *process)
         process->SetReadyState();
     } else {
         std::vector<Process *>::iterator it = processes_queue.begin();
+        it++;
         int duration = process->GetDuration();
 
         // Find correct position to insert process
-        while (it != processes_queue.end() && (*it)->GetDuration() < duration) {
-            ++it;
+        while (it != processes_queue.end() && duration >= (*it)->GetDuration()) {
+            it++;
         }
 
         // If is shortest job sets at second position (Prevents preemption before current process finishes)

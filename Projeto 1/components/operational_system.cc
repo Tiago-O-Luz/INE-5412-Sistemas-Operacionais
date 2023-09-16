@@ -55,7 +55,7 @@ void OperationalSystem::Run() {
             scheduler->GetProcessesQueue().front()->IncreaseExecutedTime();
             scheduler->GetProcessesQueue().front()->IncreaseQuantumTime();
         } else {
-            if (scheduler->GetCreatedProcess() >= scheduler->GetProcessParams().size()) {
+            if (scheduler->GetCreatedProcess() >= scheduler->GetProcessesList().size()) {
                 // Check if all process were already created
                 break;
             }

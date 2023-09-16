@@ -14,8 +14,8 @@
 class Scheduler
 {
     // Implemented by child classes
-    virtual void doAddToQueue(Process *process) {}
-    virtual bool doUpdateQueue() {}
+    virtual void doAddToQueue(Process *process) = 0;
+    virtual bool doUpdateQueue() = 0;
 
     protected:
         ProcessControlBlock process_control_block; // Process context

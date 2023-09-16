@@ -44,9 +44,7 @@ void Scheduler::AddToQueue(Process *process) {
 // Calls update queue logic implemented by child class
 // Returns bool true if process changed
 bool Scheduler::UpdateQueue() {
-    if (!processes_queue.empty()) {
-        doUpdateQueue();
-    }
+    return doUpdateQueue();
 }
 
 ProcessControlBlock Scheduler::GetProcessControlBLock() {

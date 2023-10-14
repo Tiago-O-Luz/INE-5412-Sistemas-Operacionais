@@ -4,7 +4,7 @@ COMPONENTS = ./components
 SOURCES = $(wildcard $(COMPONENTS)/*.cc)
 
 all:
-	g++ main.cpp -o app
+	g++ main.cpp $(SOURCES) -I $(HEADERS) -o app
 run:
 	./app $(ARGS)
 clean:

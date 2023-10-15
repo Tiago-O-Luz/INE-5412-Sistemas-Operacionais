@@ -4,6 +4,11 @@
 
 using namespace std;
 
+FifoAlgorithm::FifoAlgorithm(int frameMax) {
+    frameCount = 0;
+    framesAmount = frameMax;
+}
+
 void FifoAlgorithm::ProcessReference(int page_ref) {
     if (!tlb.IsPageLoaded(page_ref)) {
         // If virtual page not loaded

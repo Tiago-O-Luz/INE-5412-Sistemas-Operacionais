@@ -10,8 +10,13 @@ int main(int argc, char*argv[]) {
     std::cin >> input_file;
 
     File f(input_file);
-    f.read_file();
+    while()
+        int page = f.read_file();
+        fifo.ProcessReference(page);
+        lru.ProcessReference(page);
+    }
 
+        opt.ProcessReference(page);
     CpuParams params(frames, f.get_pages_input());
     std::cout <<"\n"<< params.get_frames() << " quadros";
 }

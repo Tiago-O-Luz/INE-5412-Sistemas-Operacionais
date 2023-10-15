@@ -13,6 +13,7 @@ class FifoAlgorithm : PageAlgorithm {
     private:
         queue<int> page_queue;
     public:
+        FifoAlgorithm(int frameMax);
         void ProcessReference(int page_ref);
 };
 

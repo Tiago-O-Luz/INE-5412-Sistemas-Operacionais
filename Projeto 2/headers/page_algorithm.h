@@ -10,7 +10,7 @@ class PageAlgorithm{
     protected:
         TransitionLookasideBuffer tlb;
         int frameCount; // nº de quadros em uso
-        int framesAmount; //nº de quadros
+        int framesAmount; //nº de quadros max
         int pagefaults; //nº de acesso a memória
 
     public:

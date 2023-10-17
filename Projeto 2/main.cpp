@@ -10,10 +10,14 @@ int main(int argc, char*argv[]) {
     std::cin >> input_file;
 
     File f(input_file);
-    while()
+    int i = 0;                      // Lógica que eu tinha montato para a função que retornaria cada ṕagina lida no read_file (NAO ESTA COMPLETO)
+    while(i != -1) {
         int page = f.read_file();
-        fifo.ProcessReference(page);
-        lru.ProcessReference(page);
+        if (page != -1) {
+            fifo.ProcessReference(page);
+            lru.ProcessReference(page);
+        }
+        i++;
     }
 
         opt.ProcessReference(page);

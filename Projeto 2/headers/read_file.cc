@@ -43,20 +43,26 @@ public:
 		}
 	}
 	
-	void read_file() {
+	int read_file() {
         if (!myfile.is_open()) {
 			cout << "Arquivo não está aberto!" << endl;
 		}
 		std::string line;
-        while (std::getline(myfile, line)) {
-			if (line[0] != '\n') {
-            	pages_input.push_back(line[0]-'0');
-			}
-        }
+		std::getline(myfile, line);
+		if (line[0] != '\n') {
+			int page = line[0] - '0';
+            pages_input.push_back(page);
+			return page;
+		}
+		return '-';
+        // while (std::getline(myfile, line)) {
+		// 	if (line[0] != '\n') {
+		// 	}
+        // }
 
-        for (int i = 0; i < pages_input.size(); i++) {
-        std::cout << pages_input[i] << ",";
-        }
+        // for (int i = 0; i < pages_input.size(); i++) {
+        // std::cout << pages_input[i] << ",";
+        // }
 
 	}
 

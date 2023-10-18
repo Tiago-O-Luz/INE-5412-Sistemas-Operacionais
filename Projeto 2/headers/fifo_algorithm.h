@@ -9,7 +9,7 @@ using namespace std;
 #define FIFO_ALG
 
 
-class FifoAlgorithm : PageAlgorithm {
+class FifoAlgorithm: PageAlgorithm {
     private:
         queue<int> page_queue;
     public:

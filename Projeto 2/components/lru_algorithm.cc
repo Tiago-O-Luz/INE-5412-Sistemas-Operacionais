@@ -31,7 +31,7 @@ void LruAlgorithm::ProcessReference(int page_ref) {
         // If virtual page IS loaded put the page like the most recently used
         std::queue<int> temp_page_queue;                            // Make a temporary queue
         for (int i = 0; i < frameCount; i++) {                      
-            int page = page_queue.front()
+            int page = page_queue.front();
             page_queue.pop();
 
             if (page != page_ref) {                                 // If is NOT the current page reference, just push back to the temporary queue

@@ -14,7 +14,7 @@ class PageAlgorithm{
         int pagefaults; //nº de acesso a memória
 
     public:
-        virtual void ProcessReference() = 0;
+        virtual void ProcessReference(int page_ref) = 0;
 };
 
 #endif

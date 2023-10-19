@@ -14,7 +14,9 @@ class FifoAlgorithm: PageAlgorithm {
         queue<int> page_queue;
     public:
         FifoAlgorithm(int frameMax);
-        void ProcessReference(int page_ref);
+        void ProcessReference(int page_ref) override;
+        int get_pagefaults();
+        void print_queue();
 };
 
 #endif

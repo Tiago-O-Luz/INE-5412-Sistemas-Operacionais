@@ -9,12 +9,13 @@ using namespace std;
 #define LRU_ALG
 
 
-class LruAlgorithm : PageAlgorithm {
+class LruAlgorithm: PageAlgorithm {
     private:
         queue<int> page_queue;
     public:
         LruAlgorithm(int frameMax);
-        void ProcessReference(int page_ref);
+        void ProcessReference(int page_ref) override;
+        int get_pagefaults();
 };
 
 #endif

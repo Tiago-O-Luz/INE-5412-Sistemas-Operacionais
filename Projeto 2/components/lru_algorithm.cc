@@ -1,4 +1,5 @@
 
+#include <iostream> 
 
 #include "lru_algorithm.h"
 
@@ -7,6 +8,7 @@ using namespace std;
 LruAlgorithm::LruAlgorithm(int frameMax) {
     frameCount = 0;
     framesAmount = frameMax;
+    pagefaults = 0;
 }
 
 void LruAlgorithm::ProcessReference(int page_ref) {
@@ -16,15 +18,15 @@ void LruAlgorithm::ProcessReference(int page_ref) {
         pagefaults++;
         if (frameCount >= framesAmount) {
             // If all physical pages are occupied
-            int p_page = tlb.GetPageReference(page_queue.back());   // Get pyhsical page of first loaded virtual page
-            tlb.UpdatePageReference(page_queue.back(), 0);          // Update TLB to unload page
+            int p_page = tlb.GetPageReference(page_queue.front());   // Get pyhsical page of first loaded virtual page
+            tlb.UpdatePageReference(page_queue.front(), 0);          // Update TLB to unload page
             page_queue.pop();                                       // Remove page from queue
             page_queue.push(page_ref);                              // Add new page reference to queue
             tlb.UpdatePageReference(page_ref, p_page);              // Update TLB on new page entrance
         } else {
             // If physical pages available
             page_queue.push(page_ref);                              // Add new page reference to queue
-            tlb.UpdatePageReference(page_ref, frameCount);          // Update TLB on new page entrance
+            tlb.UpdatePageReference(page_ref, frameCount+1);          // Update TLB on new page entrance
             frameCount++;
         }
     } else {
@@ -42,4 +44,11 @@ void LruAlgorithm::ProcessReference(int page_ref) {
 
         page_queue = temp_page_queue;                               // the temporary queue is the new page queue
     }
+    std::cout << " pagina faltou: " << pagefaults << endl;
+    tlb.print_table();
+}
+
+int LruAlgorithm::get_pagefaults()
+{
+    return pagefaults;
 }

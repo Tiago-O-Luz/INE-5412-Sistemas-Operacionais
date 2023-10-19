@@ -18,22 +18,23 @@ int main(int argc, char*argv[]) {
     int page = f.read_file();
 
     while(page != -48) {
+        std::cout << page << " pagina" << "\n";
+        std::cout << endl;
+        
         fifo.ProcessReference(page);
         lru.ProcessReference(page);
 
-        std::cout << page << " página" << "\n";
-        std::cout << endl;
         page = f.read_file();
     }
 
-    std::cout << fifo.get_pagefaults() << "fifo page faults" << endl;
-    std::cout << endl;
-    fifo.print_queue();
-    std::cout << endl;
-    std::cout << lru.get_pagefaults() << "lru page faults" << endl;
+    CpuParams params(frames, f.get_pages_input());
+    std::cout <<"\n"<< params.get_frames() << " quadros" << endl;
+    std::cout << "FIFO: " << fifo.get_pagefaults() << " PFs" << endl;
+    // fifo.print_queue();
+    std::cout << "LRU: " << lru.get_pagefaults() << " PFs" << endl;
+    // std::cout << lru.get_pagefaults() << "lru page faults" << endl;
+    // std::cout << "OPT: " << opt.get_pagefaults() << " PFs" << endl;
 
         // opt.ProcessReference(page);
-    CpuParams params(frames, f.get_pages_input());
     //
-    std::cout <<"\n"<< params.get_frames() << " quadros";
 }

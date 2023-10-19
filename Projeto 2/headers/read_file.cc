@@ -50,7 +50,7 @@ public:
 		std::string line;
 		std::getline(myfile, line);
 		if (line[0] != '\n') {
-			int page = line[0] - '0';
+			int page = stoi(line);
             pages_input.push_back(page);
 			return page;
 		}

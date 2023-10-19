@@ -11,7 +11,7 @@ using namespace std;
 
 class LruAlgorithm: PageAlgorithm {
     private:
-        queue<int> page_queue;
+        vector<int> page_queue;
     public:
         LruAlgorithm(int frameMax);
         void ProcessReference(int page_ref) override;

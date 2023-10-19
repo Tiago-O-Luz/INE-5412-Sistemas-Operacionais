@@ -30,7 +30,7 @@ void FifoAlgorithm::ProcessReference(int page_ref) {
             frameCount++;
         }
         std::cout << " pagina faltou: " << pagefaults << endl;
-        tlb.print_table();
+        // tlb.print_table();
     }
 }
 

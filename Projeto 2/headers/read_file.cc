@@ -48,10 +48,10 @@ public:
 			cout << "Arquivo não está aberto!" << endl;
 		}
 		std::string line;
-		std::getline(myfile, line);
-		if (line[0] != '\n') {
+		if (std::getline(myfile, line)) {
 			int page = stoi(line);
             pages_input.push_back(page);
+			cout<< page;
 			return page;
 		}
 		return '-';

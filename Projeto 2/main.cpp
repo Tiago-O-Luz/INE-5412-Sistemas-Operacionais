@@ -17,7 +17,7 @@ int main(int argc, char*argv[]) {
     File f(input_file);
     int page = f.read_file();
 
-    while(page != -48) {
+    while(page != 45) {
         std::cout << page << " pagina" << "\n";
         std::cout << endl;
         

@@ -32,27 +32,14 @@ void LruAlgorithm::ProcessReference(int page_ref) {
             frameCount++;
         }
     } else {
-        // If virtual page IS loaded put the page like the most recently used
+        // If virtual page IS loaded put the page as the most recently used
         vector<int>::iterator it = page_queue.begin();
-        while (*it != page_ref)
-        {
-            it++;
-        }
+        
+        while (*it != page_ref) it++; // Find page position in queue
+        
+        // Remove and add to back of queue
         page_queue.erase(it);
         page_queue.push_back(page_ref);
-
-        // std::queue<int> temp_page_queue;                            // Make a temporary queue
-        // for (int i = 0; i < frameCount; i++) {                      
-        //     int page = page_queue.front();
-        //     page_queue.pop();
-
-        //     if (page != page_ref) {                                 // If is NOT the current page reference, just push back to the temporary queue
-        //         temp_page_queue.push(page);
-        //     }
-        // }
-        // temp_page_queue.push(page_ref);                             // At end, push the page reference
-
-        // page_queue = temp_page_queue;                               // the temporary queue is the new page queue
     }
 }
 

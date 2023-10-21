@@ -18,19 +18,24 @@ int main(int argc, char*argv[]) {
     File f(input_file);
     int page = f.read_file();
 
+    // Process file
     while(page != 45) {
         std::cout << page << " pagina" << "\n";
         std::cout << endl;
-        
-        fifo.ProcessReference(page);
-        lru.ProcessReference(page);
 
         page = f.read_file();
     }
 
     OptAlgorithm opt(frames, f.get_pagemap());
+    f.print_pages();
     
+    // Process algorithms
     for (auto page: *f.get_inputrefs()) {
+
+        fifo.ProcessReference(page);
+        
+        lru.ProcessReference(page);
+        
         opt.ProcessReference(page);
     }
     //CpuParams params(frames, f.get_pages_input());

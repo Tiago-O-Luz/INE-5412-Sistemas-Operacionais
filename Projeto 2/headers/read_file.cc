@@ -53,27 +53,18 @@ public:
 		}
 		string line;
 		if (getline(myfile, line)) {
-			int page = stoi(line);
-			if (pagemap->count(page)) {
-				pagemap->at(page).push_back(current_line);
-			} else {
-				pagemap->insert(pair<int, vector<int>>(page, vector<int>()));
-				pagemap->at(page).push_back(current_line);
+			// Read one line
+			int page = stoi(line);	// String to int
+			if (!pagemap->count(page)) {
+				// If virutal page doesn't exists as key
+				pagemap->insert(pair<int, vector<int>>(page, vector<int>())); // Add key to virtual page
 			}
-			input_refs->push_back(page);
+			pagemap->at(page).push_back(current_line);	// Add to list of refs current line (time)
+			input_refs->push_back(page);				// Add entry to input list 
             current_line++;
 			return page;
 		}
 		return '-';
-        // while (getline(myfile, line)) {
-		// 	if (line[0] != '\n') {
-		// 	}
-        // }
-
-        // for (int i = 0; i < pagemap.size(); i++) {
-        // cout << pagemap[i] << ",";
-        // }
-
 	}
 
 	map<int, vector<int>>* get_pagemap() {

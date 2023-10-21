@@ -25,6 +25,7 @@ int TransitionLookasideBuffer::GetPageReference(int virtual_page) {
 
 vector<int> TransitionLookasideBuffer::GetLoadedPages() {
     vector<int> v;
+    
     for (auto i: inverted_table) {
         v.push_back(i.second);
     }

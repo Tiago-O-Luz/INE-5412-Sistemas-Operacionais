@@ -34,7 +34,7 @@ void FifoAlgorithm::ProcessReference(int page_ref) {
     }
 }
 
-int FifoAlgorithm::get_pagefaults() {
+int FifoAlgorithm::GetPageFaults() {
     return pagefaults;
 }
 

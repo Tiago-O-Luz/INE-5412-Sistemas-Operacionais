@@ -5,6 +5,7 @@
 #include "read_file.cc"
 #include "fifo_algorithm.h"
 #include "lru_algorithm.h"
+#include "opt_algorithm.h"
 
 int main(int argc, char*argv[]) {
     std::string input_file;
@@ -27,13 +28,18 @@ int main(int argc, char*argv[]) {
         page = f.read_file();
     }
 
-    CpuParams params(frames, f.get_pages_input());
-    std::cout <<"\n"<< params.get_frames() << " quadros" << endl;
-    std::cout << "FIFO: " << fifo.get_pagefaults() << " PFs" << endl;
+    OptAlgorithm opt(frames, f.get_pagemap());
+    
+    for (auto page: *f.get_inputrefs()) {
+        opt.ProcessReference(page);
+    }
+    //CpuParams params(frames, f.get_pages_input());
+    //std::cout <<"\n"<< params.get_frames() << " quadros" << endl;
+    std::cout << "FIFO: " << fifo.GetPageFaults() << " PFs" << endl;
     // fifo.print_queue();
-    std::cout << "LRU: " << lru.get_pagefaults() << " PFs" << endl;
-    // std::cout << lru.get_pagefaults() << "lru page faults" << endl;
-    // std::cout << "OPT: " << opt.get_pagefaults() << " PFs" << endl;
+    std::cout << "LRU: " << lru.GetPageFaults() << " PFs" << endl;
+    // std::cout << lru.GetPageFaults() << "lru page faults" << endl;
+    std::cout << "OPT: " << opt.GetPageFaults() << " PFs" << endl;
 
         // opt.ProcessReference(page);
     //

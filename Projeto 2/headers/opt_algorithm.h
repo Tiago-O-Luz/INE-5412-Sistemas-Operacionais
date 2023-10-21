@@ -5,15 +5,15 @@
 
 using namespace std;
 
-#ifndef LRU_ALG
-#define LRU_ALG
+#ifndef OPT_ALG
+#define OPT_ALG
 
 
-class LruAlgorithm: PageAlgorithm {
+class OptAlgorithm: PageAlgorithm {
     private:
-        vector<int> page_queue;
+        map<int, vector<int>>* pagemap;
     public:
-        LruAlgorithm(int frameMax);
+        OptAlgorithm(int frameMax, map<int, vector<int>>* pagemap);
         void ProcessReference(int page_ref) override;
         int GetPageFaults();
 };

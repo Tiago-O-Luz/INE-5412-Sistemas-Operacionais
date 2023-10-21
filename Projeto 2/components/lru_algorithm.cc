@@ -56,7 +56,7 @@ void LruAlgorithm::ProcessReference(int page_ref) {
     }
 }
 
-int LruAlgorithm::get_pagefaults()
+int LruAlgorithm::GetPageFaults()
 {
     return pagefaults;
 }

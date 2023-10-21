@@ -15,11 +15,23 @@ void TransitionLookasideBuffer::UpdatePageReference(int virtual_page, int physic
     this->table[virtual_page] = physical_page;
 }
 
+void TransitionLookasideBuffer::UpdateInvertedPageReference(int physical_page, int virtual_page) {
+    this->inverted_table[physical_page] = virtual_page;
+}
+
 int TransitionLookasideBuffer::GetPageReference(int virtual_page) {
     return table[virtual_page];
 }
 
-void TransitionLookasideBuffer::print_table()
+vector<int> TransitionLookasideBuffer::GetLoadedPages() {
+    vector<int> v;
+    for (auto i: inverted_table) {
+        v.push_back(i.second);
+    }
+    return v;
+}
+
+void TransitionLookasideBuffer::PrintTable()
 {
     for (const auto& par : table) {
         std::cout << par.first << ":" << par.second << "/";

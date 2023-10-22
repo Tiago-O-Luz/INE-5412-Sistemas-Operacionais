@@ -48,7 +48,7 @@ void OptAlgorithm::ProcessReference(int page_ref) {
                     }
                 }
             }
-            cout << "Page swap:" << pageToSwap << " for " << page_ref << endl;
+            // cout << "Page swap:" << pageToSwap << " for " << page_ref << endl;
 
             int p_page = tlb.GetPageReference(pageToSwap);      // Get pyhsical page of loaded virtual page
             tlb.UpdatePageReference(pageToSwap, 0);             // Update TLB to unload page

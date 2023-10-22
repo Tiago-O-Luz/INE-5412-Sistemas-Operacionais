@@ -26,14 +26,14 @@ int main(int argc, char*argv[]) {
 
     // Process file
     while(page != 45) {
-        std::cout << page << " pagina" << "\n";
-        std::cout << endl;
+        // std::cout << page << " pagina" << "\n";
+        // std::cout << endl;
 
         page = f.read_file();
     }
 
     OptAlgorithm opt(frames, f.get_pagemap());
-    f.print_pages();
+    // f.print_pages();
     
     // Process algorithms
 
@@ -43,18 +43,21 @@ int main(int argc, char*argv[]) {
         {
             #pragma opm section 
             {
+                #pragma opm parallel for
                 for (auto page: *f.get_inputrefs()) {   
                     fifo.ProcessReference(page);
                 };
             }
             #pragma opm section 
             {
+                #pragma opm parallel for
                 for (auto page: *f.get_inputrefs()) {
                     lru.ProcessReference(page);
                 }
             }
             #pragma opm section 
             {
+                #pragma opm parallel for
                 for (auto page: *f.get_inputrefs()) {
                     opt.ProcessReference(page);
                 }

@@ -29,7 +29,7 @@ void FifoAlgorithm::ProcessReference(int page_ref) {
             tlb.UpdatePageReference(page_ref, frameCount+1);          // Update TLB on new page entrance
             frameCount++;
         }
-        std::cout << " pagina faltou: " << pagefaults << endl;
+        // std::cout << " pagina faltou: " << pagefaults << endl;
         // tlb.print_table();
     }
 }

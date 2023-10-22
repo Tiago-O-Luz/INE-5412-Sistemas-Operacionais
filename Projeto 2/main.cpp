@@ -2,7 +2,7 @@
 #include <stdlib.h> 
 #include <iostream> 
 #include <string>
-#include <chrono>
+// #include <chrono>
 #include <omp.h>
 
 #include "read_file.cc"
@@ -11,7 +11,7 @@
 #include "opt_algorithm.h"
 
 int main(int argc, char*argv[]) {
-    std::chrono::time_point<std::chrono::system_clock> start, end;
+    // std::chrono::time_point<std::chrono::system_clock> start, end;
     if (argc < 2) {
         std::cout << "Informe a quantidade de frames para simulacao";
         return 1;
@@ -21,7 +21,7 @@ int main(int argc, char*argv[]) {
     int frames = std::stoi(argv[1]);
     std::cin >> input_file;
 
-    start = std::chrono::system_clock::now();
+    // start = std::chrono::system_clock::now();
 
     File f(input_file);
     int page = f.ReadFile();
@@ -64,15 +64,18 @@ int main(int argc, char*argv[]) {
             }
         }
     }
+    if (f.GetFlagError()) {
+        std::cout << frames << " quadros" << endl;
+        std::cout << f.GetLenghtRefs() << " refs" << endl;
+        std::cout << "FIFO: " << fifo.GetPageFaults() << " PFs" << endl;
+        std::cout << "LRU: " << lru.GetPageFaults() << " PFs" << endl;
+        std::cout << "OPT: " << opt.GetPageFaults() << " PFs" << endl;
+    }
 
-    std::cout << "FIFO: " << fifo.GetPageFaults() << " PFs" << endl;
-    std::cout << "LRU: " << lru.GetPageFaults() << " PFs" << endl;
-    std::cout << "OPT: " << opt.GetPageFaults() << " PFs" << endl;
+    // end = std::chrono::system_clock::now();
 
-    end = std::chrono::system_clock::now();
-
-    std::chrono::duration<double> elapsed_seconds = end - start;
-    std::time_t end_time = std::chrono::system_clock::to_time_t(end);
-    std::cout << "finished computation at " << std::ctime(&end_time)
-            << "elapsed time: " << elapsed_seconds.count() << "s\n";
+    // std::chrono::duration<double> elapsed_seconds = end - start;
+    // std::time_t end_time = std::chrono::system_clock::to_time_t(end);
+    // std::cout << "finished computation at " << std::ctime(&end_time)
+    //         << "elapsed time: " << elapsed_seconds.count() << "s\n";
 }

@@ -4,34 +4,8 @@
 #include <vector>
 #include <map>
 
-#ifndef CPU_PARAMS
-#define CPU_PARAMS
 
 using namespace std;
-
-class CpuParams
-{	
-public:
-	CpuParams(int frames_input, map<int, vector<int>>* pagemap) { 
-		frames = frames_input;
-		pages = pagemap;
-	}
-
-	int get_frames() {
-		return frames;
-	}
-
-	map<int, vector<int>>* get_pages() {
-		return pages;
-	}
-	~CpuParams() {
-		// nao sei oq botar aq
-	}
-	
-private:	
-	int frames;
-	map<int, vector<int>>* pages;
-};
 
 class File
 {
@@ -41,15 +15,18 @@ public:
 		pagemap = new map<int, vector<int>>;
 		input_refs = new vector<int>;
 		current_line = 0;
+		flag_error = true;
 		myfile.open(name_file);
 		if (!myfile.is_open()) {
 			cout << "Erro ao abrir o arquivo!\n";
+			flag_error = false;
 		}
 	}
 	
 	int ReadFile() {
         if (!myfile.is_open()) {
 			cout << "Arquivo não está aberto!" << endl;
+			flag_error = false;
 		}
 		string line;
 		if (getline(myfile, line)) {
@@ -75,6 +52,14 @@ public:
 		return input_refs;
 	}
 
+	int GetLenghtRefs() {
+		return input_refs->size();
+	}
+
+	bool GetFlagError() {
+		return flag_error;
+	}
+
 	void PrintPages() {
 		for (auto i: *pagemap) {
 			cout << i.first << ": ";
@@ -87,7 +72,7 @@ public:
 
 	~File() {
 		myfile.close();
-            // nao sei oq botar aq
+
 		delete pagemap;
 		delete input_refs;
 	}
@@ -96,7 +81,5 @@ private:
 	map<int, vector<int>> *pagemap;
 	vector<int> *input_refs;
 	int current_line;
+	bool flag_error;
 };
-
-
-#endif

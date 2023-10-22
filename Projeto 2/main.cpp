@@ -12,6 +12,11 @@
 
 int main(int argc, char*argv[]) {
     std::chrono::time_point<std::chrono::system_clock> start, end;
+    if (argc < 2) {
+        std::cout << "Informe a quantidade de frames para simulacao";
+        return 1;
+    }
+
     std::string input_file;
     int frames = std::stoi(argv[1]);
     std::cin >> input_file;

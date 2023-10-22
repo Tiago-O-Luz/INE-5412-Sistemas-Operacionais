@@ -12,7 +12,6 @@ FifoAlgorithm::FifoAlgorithm(int frameMax) {
 }
 
 void FifoAlgorithm::ProcessReference(int page_ref) {
-    // std::cout << tlb.IsPageLoaded(page_ref) << "se pagina esta carregada" << endl;
     if (!tlb.IsPageLoaded(page_ref)) {
         // If virtual page not loaded
         pageFaults++;
@@ -29,8 +28,6 @@ void FifoAlgorithm::ProcessReference(int page_ref) {
             tlb.UpdatePageReference(page_ref, frameCount+1);          // Update TLB on new page entrance
             frameCount++;
         }
-        // std::cout << " pagina faltou: " << pagefaults << endl;
-        // tlb.print_table();
     }
 }
 

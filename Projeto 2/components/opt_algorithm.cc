@@ -18,8 +18,6 @@ OptAlgorithm::OptAlgorithm(int frameMax, map<int, vector<int>>* pagemap) {
 void OptAlgorithm::ProcessReference(int page_ref) {
     if (!tlb.IsPageLoaded(page_ref)) {
         // If virtual page not loaded
-        // std::cout << " pagina faltou: " << page_ref << endl;
-        // tlb.PrintTable();
         pageFaults++;
         if (frameCount >= framesMax) {
             // If all physical pages are occupied
@@ -48,7 +46,6 @@ void OptAlgorithm::ProcessReference(int page_ref) {
                     }
                 }
             }
-            // cout << "Page swap:" << pageToSwap << " for " << page_ref << endl;
 
             int p_page = tlb.GetPageReference(pageToSwap);      // Get pyhsical page of loaded virtual page
             tlb.UpdatePageReference(pageToSwap, 0);             // Update TLB to unload page

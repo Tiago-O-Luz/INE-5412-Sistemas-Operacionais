@@ -18,22 +18,17 @@ int main(int argc, char*argv[]) {
 
     start = std::chrono::system_clock::now();
 
-    FifoAlgorithm fifo(frames);
-    LruAlgorithm lru(frames);
-
     File f(input_file);
-    int page = f.read_file();
+    int page = f.ReadFile();
 
     // Process file
     while(page != 45) {
-        // std::cout << page << " pagina" << "\n";
-        // std::cout << endl;
-
-        page = f.read_file();
+        page = f.ReadFile();
     }
 
-    OptAlgorithm opt(frames, f.get_pagemap());
-    // f.print_pages();
+    FifoAlgorithm fifo(frames);
+    LruAlgorithm lru(frames);
+    OptAlgorithm opt(frames, f.GetPagemap());
     
     // Process algorithms
 
@@ -44,44 +39,31 @@ int main(int argc, char*argv[]) {
             #pragma opm section 
             {
                 #pragma opm parallel for
-                for (auto page: *f.get_inputrefs()) {   
+                for (auto page: *f.GetInputRefs()) {   
                     fifo.ProcessReference(page);
                 };
             }
             #pragma opm section 
             {
                 #pragma opm parallel for
-                for (auto page: *f.get_inputrefs()) {
+                for (auto page: *f.GetInputRefs()) {
                     lru.ProcessReference(page);
                 }
             }
             #pragma opm section 
             {
                 #pragma opm parallel for
-                for (auto page: *f.get_inputrefs()) {
+                for (auto page: *f.GetInputRefs()) {
                     opt.ProcessReference(page);
                 }
             }
         }
     }
-    // for (auto page: *f.get_inputrefs()) {
 
-    //     fifo.ProcessReference(page);
-        
-    //     lru.ProcessReference(page);
-        
-    //     opt.ProcessReference(page);
-    // }
-    //CpuParams params(frames, f.get_pages_input());
-    //std::cout <<"\n"<< params.get_frames() << " quadros" << endl;
     std::cout << "FIFO: " << fifo.GetPageFaults() << " PFs" << endl;
-    // fifo.print_queue();
     std::cout << "LRU: " << lru.GetPageFaults() << " PFs" << endl;
-    // std::cout << lru.GetPageFaults() << "lru page faults" << endl;
     std::cout << "OPT: " << opt.GetPageFaults() << " PFs" << endl;
 
-        // opt.ProcessReference(page);
-    //
     end = std::chrono::system_clock::now();
 
     std::chrono::duration<double> elapsed_seconds = end - start;

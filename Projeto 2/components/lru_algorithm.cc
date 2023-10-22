@@ -14,9 +14,6 @@ LruAlgorithm::LruAlgorithm(int frameMax) {
 void LruAlgorithm::ProcessReference(int page_ref) {
     if (!tlb.IsPageLoaded(page_ref)) {
         // If virtual page not loaded
-        // Keep this code of FIFO
-        // std::cout << " pagina faltou: " << pagefaults << endl;
-        // tlb.print_table();
         pageFaults++;
         if (frameCount >= framesMax) {
             // If all physical pages are occupied

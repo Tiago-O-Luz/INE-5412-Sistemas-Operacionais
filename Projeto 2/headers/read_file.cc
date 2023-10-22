@@ -47,7 +47,7 @@ public:
 		}
 	}
 	
-	int read_file() {
+	int ReadFile() {
         if (!myfile.is_open()) {
 			cout << "Arquivo não está aberto!" << endl;
 		}
@@ -67,15 +67,15 @@ public:
 		return '-';
 	}
 
-	map<int, vector<int>>* get_pagemap() {
+	map<int, vector<int>>* GetPagemap() {
 		return pagemap;
 	}
 
-	vector<int>* get_inputrefs() {
+	vector<int>* GetInputRefs() {
 		return input_refs;
 	}
 
-	void print_pages() {
+	void PrintPages() {
 		for (auto i: *pagemap) {
 			cout << i.first << ": ";
 			for(auto a: i.second) {

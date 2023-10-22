@@ -7,18 +7,18 @@ using namespace std;
 
 LruAlgorithm::LruAlgorithm(int frameMax) {
     frameCount = 0;
-    framesAmount = frameMax;
-    pagefaults = 0;
+    framesMax = frameMax;
+    pageFaults = 0;
 }
 
 void LruAlgorithm::ProcessReference(int page_ref) {
     if (!tlb.IsPageLoaded(page_ref)) {
         // If virtual page not loaded
         // Keep this code of FIFO
-        std::cout << " pagina faltou: " << pagefaults << endl;
+        std::cout << " pagina faltou: " << pageFaults << endl;
         // tlb.print_table();
-        pagefaults++;
-        if (frameCount >= framesAmount) {
+        pageFaults++;
+        if (frameCount >= framesMax) {
             // If all physical pages are occupied
             int p_page = tlb.GetPageReference(page_queue.front());   // Get pyhsical page of first loaded virtual page
             tlb.UpdatePageReference(page_queue.front(), 0);          // Update TLB to unload page
@@ -45,5 +45,5 @@ void LruAlgorithm::ProcessReference(int page_ref) {
 
 int LruAlgorithm::GetPageFaults()
 {
-    return pagefaults;
+    return pageFaults;
 }

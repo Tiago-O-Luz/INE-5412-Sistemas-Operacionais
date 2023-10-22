@@ -7,16 +7,16 @@ using namespace std;
 
 FifoAlgorithm::FifoAlgorithm(int frameMax) {
     frameCount = 0;
-    framesAmount = frameMax;
-    pagefaults = 0;
+    framesMax = frameMax;
+    pageFaults = 0;
 }
 
 void FifoAlgorithm::ProcessReference(int page_ref) {
     // std::cout << tlb.IsPageLoaded(page_ref) << "se pagina esta carregada" << endl;
     if (!tlb.IsPageLoaded(page_ref)) {
         // If virtual page not loaded
-        pagefaults++;
-        if (frameCount >= framesAmount) {
+        pageFaults++;
+        if (frameCount >= framesMax) {
             // If all physical pages are occupied
             int p_page = tlb.GetPageReference(page_queue.front());   // Get pyhsical page of first loaded virtual page
             tlb.UpdatePageReference(page_queue.front(), 0);          // Update TLB to unload page
@@ -29,13 +29,13 @@ void FifoAlgorithm::ProcessReference(int page_ref) {
             tlb.UpdatePageReference(page_ref, frameCount+1);          // Update TLB on new page entrance
             frameCount++;
         }
-        std::cout << " pagina faltou: " << pagefaults << endl;
+        std::cout << " pagina faltou: " << pageFaults << endl;
         // tlb.print_table();
     }
 }
 
 int FifoAlgorithm::GetPageFaults() {
-    return pagefaults;
+    return pageFaults;
 }
 
 void FifoAlgorithm::print_queue() {

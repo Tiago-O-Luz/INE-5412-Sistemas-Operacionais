@@ -9,8 +9,8 @@ using namespace std;
 
 OptAlgorithm::OptAlgorithm(int frameMax, map<int, vector<int>>* pagemap) {
     frameCount = 0;
-    framesAmount = frameMax;
-    pagefaults = 0;
+    framesMax = frameMax;
+    pageFaults = 0;
     this->pagemap = pagemap;
 };
 
@@ -19,8 +19,8 @@ void OptAlgorithm::ProcessReference(int page_ref) {
         // If virtual page not loaded
         std::cout << " pagina faltou: " << page_ref << endl;
         // tlb.PrintTable();
-        pagefaults++;
-        if (frameCount >= framesAmount) {
+        pageFaults++;
+        if (frameCount >= framesMax) {
             // If all physical pages are occupied
             vector<int> loaded_pages = tlb.GetLoadedPages(); // Get current loaded virtual pages
             int maxTimeRef = 0;
@@ -61,5 +61,5 @@ void OptAlgorithm::ProcessReference(int page_ref) {
 }
 
 int OptAlgorithm::GetPageFaults() {
-    return pagefaults;
+    return pageFaults;
 }

@@ -9,7 +9,6 @@ using namespace std;
 
 class TransitionLookasideBuffer {
     private:
-        int tableSize;
         map<int,int> table;
         map<int,int> inverted_table;
 

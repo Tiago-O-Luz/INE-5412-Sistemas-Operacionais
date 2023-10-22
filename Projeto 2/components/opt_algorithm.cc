@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include "opt_algorithm.h"
+#include <omp.h>
 
 
 using namespace std;
@@ -17,7 +18,7 @@ OptAlgorithm::OptAlgorithm(int frameMax, map<int, vector<int>>* pagemap) {
 void OptAlgorithm::ProcessReference(int page_ref) {
     if (!tlb.IsPageLoaded(page_ref)) {
         // If virtual page not loaded
-        std::cout << " pagina faltou: " << page_ref << endl;
+        // std::cout << " pagina faltou: " << page_ref << endl;
         // tlb.PrintTable();
         pageFaults++;
         if (frameCount >= framesMax) {
@@ -26,21 +27,28 @@ void OptAlgorithm::ProcessReference(int page_ref) {
             int maxTimeRef = 0;
             int pageToSwap = 0; // Page that will take longer to be called again
 
+            #pragma omp parallel for schedule(guided) reduction(max:maxTimeRef)
             for (auto loaded_p: loaded_pages) {
                 // Iterate over every loaded page
                 if (pagemap->at(loaded_p).empty()) {
                     // If loaded page wont be called again found page for swap
-                    pageToSwap = loaded_p;
+                    #pragma omp critical
+                    {
+                        pageToSwap = loaded_p;
+                    }
                     break;
                 };
                 int i = pagemap->at(loaded_p).front();
                 if (i >= maxTimeRef) {
                     // If this is page that will take longer to be called again
                     maxTimeRef = i;
-                    pageToSwap = loaded_p;
+                    #pragma omp critical 
+                    {
+                        pageToSwap = loaded_p;
+                    }
                 }
             }
-            cout << "Page swap:" << pageToSwap << " for " << page_ref << endl;
+            // cout << "Page swap:" << pageToSwap << " for " << page_ref << endl;
 
             int p_page = tlb.GetPageReference(pageToSwap);      // Get pyhsical page of loaded virtual page
             tlb.UpdatePageReference(pageToSwap, 0);             // Update TLB to unload page

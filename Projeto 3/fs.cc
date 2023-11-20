@@ -24,7 +24,7 @@ void INE5412_FS::fs_debug()
 
 		for (int j = 1; j < block.super.ninodes; j++) {
 			cout << "inode " << j*(i-1) << ":\n";
-			cout << "    " << "size: " << block2.inode->size() << "bytes\n";
+			cout << "    " << "size: " << block2.inode->size << "bytes\n";
 		}
 	}
 }

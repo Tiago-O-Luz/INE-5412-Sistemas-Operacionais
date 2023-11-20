@@ -51,6 +51,8 @@ public:
 
     int  fs_read(int inumber, char *data, int length, int offset);
     int  fs_write(int inumber, const char *data, int length, int offset);
+    
+    void inode_load(int inumber, class fs_inode *inode);
 
 private:
     Disk *disk;

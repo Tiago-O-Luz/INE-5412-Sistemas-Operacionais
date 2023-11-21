@@ -23,9 +23,21 @@ void INE5412_FS::fs_debug()
 		disk->read(i+1, block2.data);
 
 		for (int j = 0; j < INODES_PER_BLOCK; j++) {
-			cout << "inode " << (j+1)*(i)+(j+1) << ":\n";
-			cout << "    " << "size: " << block2.inode[j].size << " bytes\n";
-			cout << "    " << "direct blocks: " << "\n";
+			if (block2.inode[j].size != 0) {
+				cout << "inode " << (j+1)*(i)+(j+1) << ":\n";
+				cout << "    " << "size: " << block2.inode[j].size << " bytes\n";
+				cout << "    " << "direct blocks: ";
+				for (const auto& direct_block: block2.inode[j].direct) {
+					if (direct_block != 0) {
+						cout << direct_block << " ";
+					}
+				}
+				cout << "\n";
+				int indirect = block2.inode[j].indirect;
+				if (indirect != 0) {
+					cout << "    " << "indirect block: " << indirect << "\n";
+				}
+			}
 		}
 	}
 	fs_inode inode;

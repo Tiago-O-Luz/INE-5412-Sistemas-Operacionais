@@ -1,5 +1,6 @@
 #include "fs.h"
 #include <math.h>
+// #include <vector>
 
 int INE5412_FS::fs_format()
 {
@@ -79,7 +80,33 @@ void INE5412_FS::fs_debug()
 
 int INE5412_FS::fs_mount()
 {
-	return 0;
+	union fs_block block;
+	disk->read(0, block.data);
+
+	int nblocks = block.super.nblocks;
+	int ninodeblocks = block.super.ninodeblocks;
+	int bitmap[nblocks];
+
+	for (int i = 0; i < nblocks; ++i) {
+		if (i < ninodeblocks) {
+			bitmap[i] = 1;
+		} else {
+			bitmap[i] = 0;
+		} 
+	}
+
+	for (int i = 0; i < nblocks; ++i) {
+		cout << i << ": " << bitmap[i] << "\n";
+	}
+
+	// FILE* bitmap_file = fopen("bitmap", "a+");
+
+	// if (bitmap_file != nullptr) {
+	// 	for () {
+
+	// 	}
+	// }
+	return 1;
 }
 
 int INE5412_FS::fs_create()

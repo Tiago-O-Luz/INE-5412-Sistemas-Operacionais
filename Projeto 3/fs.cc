@@ -2,6 +2,22 @@
 
 int INE5412_FS::fs_format()
 {
+	union fs_block block;
+	union fs_block block2;
+	// disk->
+	disk->read(0, block.data);
+
+	block2.super.ninodeblocks = block.super.nblocks*0.1;;
+	block2.super.nblocks = block.super.nblocks;   /// é isso mesmo????
+	block2.super.magic = block.super.magic;
+
+	disk->write(0, block2.data);
+	
+	for (int j = 0; j < INODES_PER_BLOCK; j++) {
+
+	}
+	// disk->read(0, block2.data);
+	// cout << block2.super.ninodeblocks;
 	return 0;
 }
 

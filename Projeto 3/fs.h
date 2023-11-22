@@ -39,7 +39,8 @@ public:
 
     INE5412_FS(Disk *d) {
         disk = d;
-    } 
+        is_mounted = false;
+    }
 
     void fs_debug();
     int  fs_format();
@@ -54,8 +55,12 @@ public:
     
     void inode_load(int inumber, class fs_inode *inode);
 
+    void set_bitmap_block(int number);
+
 private:
     Disk *disk;
+    int *bitmap;
+    bool is_mounted;
 };
 
 #endif

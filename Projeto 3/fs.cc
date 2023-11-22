@@ -2,33 +2,6 @@
 #include <math.h>
 // #include <vector>
 
-int INE5412_FS::fs_format()
-{
-	union fs_block inode_block;
-	union fs_block super_block;
-	// disk->
-	disk->read(0, super_block.data);
-	for (int i = 0; i < super_block.super.ninodeblocks; i++) {
-		cout << "ok!\n";
-		disk->read(i+1, inode_block.data);
-		for (int j = 0; j < INODES_PER_BLOCK; j++) {
-			inode_block.inode[j].isvalid = 0;
-		}
-		disk->write(i + 1, inode_block.data);
-	}
-	cout << "ninodeblocks: " << ceil(disk->size()*0.1) << "\n";
-	super_block.super.ninodeblocks = ceil(disk->size()*0.1);
-	super_block.super.nblocks = disk->size();
-	super_block.super.ninodes = 0;
-	super_block.super.magic = FS_MAGIC;
-
-	disk->write(0, super_block.data);
-	
-	// disk->read(0, super_block.data);
-	// cout << super_block.super.ninodeblocks;
-	return 1;
-}
-
 void INE5412_FS::fs_debug()
 {
 	union fs_block block;
@@ -72,10 +45,33 @@ void INE5412_FS::fs_debug()
 			}
 		}
 	}
-	// fs_inode inode;
-	// inode_load(2, &inode);
-    // cout << inode.size << "\n";
-    
+}
+
+int INE5412_FS::fs_format()
+{
+	union fs_block inode_block;
+	union fs_block super_block;
+	// disk->
+	disk->read(0, super_block.data);
+	for (int i = 0; i < super_block.super.ninodeblocks; i++) {
+		cout << "ok!\n";
+		disk->read(i+1, inode_block.data);
+		for (int j = 0; j < INODES_PER_BLOCK; j++) {
+			inode_block.inode[j].isvalid = 0;
+		}
+		disk->write(i + 1, inode_block.data);
+	}
+	cout << "ninodeblocks: " << ceil(disk->size()*0.1) << "\n";
+	super_block.super.ninodeblocks = ceil(disk->size()*0.1);
+	super_block.super.nblocks = disk->size();
+	super_block.super.ninodes = 0;
+	super_block.super.magic = FS_MAGIC;
+
+	disk->write(0, super_block.data);
+	
+	// disk->read(0, super_block.data);
+	// cout << super_block.super.ninodeblocks;
+	return 1;
 }
 
 int INE5412_FS::fs_mount()
@@ -83,30 +79,42 @@ int INE5412_FS::fs_mount()
 	union fs_block block;
 	disk->read(0, block.data);
 
-	int nblocks = block.super.nblocks;
-	int ninodeblocks = block.super.ninodeblocks;
-	int bitmap[nblocks];
+	if(block.super.magic == FS_MAGIC) {
+		int nblocks = block.super.nblocks;
+		int ninodeblocks = block.super.ninodeblocks;
+		bitmap = new int[nblocks]{0};
 
-	for (int i = 0; i < nblocks; ++i) {
-		if (i < ninodeblocks) {
-			bitmap[i] = 1;
-		} else {
-			bitmap[i] = 0;
-		} 
+		for (int i = 0; i < ninodeblocks+1; ++i) {
+			set_bitmap_block(i);
+		}
+
+		union fs_block inode_block;
+		union fs_block ind_block;
+		for (int i = 0; i < ninodeblocks; i++) {
+			disk->read(i+1, inode_block.data);
+			for (int j = 0; j < INODES_PER_BLOCK; j++) {
+				if (inode_block.inode[j].isvalid == 1) {
+					for (const auto& direct_block: inode_block.inode[j].direct) {
+						set_bitmap_block(direct_block);
+					}
+					int indirect = inode_block.inode[j].indirect;
+					if (indirect != 0) {
+						set_bitmap_block(indirect);
+						disk->read(indirect, ind_block.data);
+						for(const auto& block_pointer: ind_block.pointers) {
+							set_bitmap_block(block_pointer);
+						}
+					}
+				}
+			}
+		}
+		// for (int i = 0; i < nblocks; ++i) {
+		// 	cout << i << ": " << bitmap[i] << "\n";
+		// }
+		is_mounted = true;
+		return 1;
 	}
-
-	for (int i = 0; i < nblocks; ++i) {
-		cout << i << ": " << bitmap[i] << "\n";
-	}
-
-	// FILE* bitmap_file = fopen("bitmap", "a+");
-
-	// if (bitmap_file != nullptr) {
-	// 	for () {
-
-	// 	}
-	// }
-	return 1;
+	return 0;
 }
 
 int INE5412_FS::fs_create()
@@ -140,4 +148,8 @@ void INE5412_FS::inode_load( int inumber, class fs_inode *inode ) {
     disk->read(i, block.data);
     i = (inumber % INODES_PER_BLOCK)-1;
     *inode = block.inode[i];
+}
+
+void INE5412_FS::set_bitmap_block(int number) {
+	bitmap[number] = 1;
 }

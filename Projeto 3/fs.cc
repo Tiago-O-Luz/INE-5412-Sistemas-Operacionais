@@ -1,24 +1,31 @@
 #include "fs.h"
+#include <math.h>
 
 int INE5412_FS::fs_format()
 {
-	union fs_block block;
-	union fs_block block2;
+	union fs_block inode_block;
+	union fs_block super_block;
 	// disk->
-	disk->read(0, block.data);
-
-	block2.super.ninodeblocks = block.super.nblocks*0.1;;
-	block2.super.nblocks = block.super.nblocks;   /// é isso mesmo????
-	block2.super.magic = block.super.magic;
-
-	disk->write(0, block2.data);
-	
-	for (int j = 0; j < INODES_PER_BLOCK; j++) {
-
+	disk->read(0, super_block.data);
+	for (int i = 0; i < super_block.super.ninodeblocks; i++) {
+		cout << "ok!\n";
+		disk->read(i+1, inode_block.data);
+		for (int j = 0; j < INODES_PER_BLOCK; j++) {
+			inode_block.inode[j].isvalid = 0;
+		}
+		disk->write(i + 1, inode_block.data);
 	}
-	// disk->read(0, block2.data);
-	// cout << block2.super.ninodeblocks;
-	return 0;
+	cout << "ninodeblocks: " << ceil(disk->size()*0.1) << "\n";
+	super_block.super.ninodeblocks = ceil(disk->size()*0.1);
+	super_block.super.nblocks = disk->size();
+	super_block.super.ninodes = 0;
+	super_block.super.magic = FS_MAGIC;
+
+	disk->write(0, super_block.data);
+	
+	// disk->read(0, super_block.data);
+	// cout << super_block.super.ninodeblocks;
+	return 1;
 }
 
 void INE5412_FS::fs_debug()
@@ -38,7 +45,7 @@ void INE5412_FS::fs_debug()
 	for (int i = 0; i < block.super.ninodeblocks; i++) {
 		disk->read(i+1, inode_block.data);
 		for (int j = 0; j < INODES_PER_BLOCK; j++) {
-			if (inode_block.inode[j].isvalid) {
+			if (inode_block.inode[j].isvalid == 1) {
 				cout << "inode " << (j+1)*(i)+(j) << ":\n";
 				cout << "    " << "size: " << inode_block.inode[j].size << " bytes\n";
 				cout << "    " << "direct blocks: ";

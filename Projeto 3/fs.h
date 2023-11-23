@@ -54,6 +54,7 @@ public:
     int  fs_write(int inumber, const char *data, int length, int offset);
     
     void inode_load(int inumber, class fs_inode *inode);
+    void inode_save(int inumber, class fs_inode *inode);
 
     void set_bitmap_block(int number);
 

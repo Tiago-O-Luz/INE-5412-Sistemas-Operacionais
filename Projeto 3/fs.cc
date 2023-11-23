@@ -119,6 +119,38 @@ int INE5412_FS::fs_mount()
 
 int INE5412_FS::fs_create()
 {
+
+	union fs_block inode_block;
+	union fs_block super_block;
+
+	disk->read(0, super_block.data);
+	int inumber = 0;
+	for (int i = 0; i < super_block.super.ninodeblocks; i++)
+	{
+		disk->read(i + 1, inode_block.data);
+		for (int j = 0; j < INODES_PER_BLOCK; j++)
+		{
+			cout << (j + 1) * (i) + (j+1) << ": " << inode_block.inode[j].isvalid << "\n";
+			if (inode_block.inode[j].isvalid == 0)
+			{
+
+				inumber = (j + 1) * (i) + (j+1);		// nao entendi mto bem como definir o inumber só sei q ele n pode ser 0
+				inode_block.inode[j].isvalid = 1;
+				inode_block.inode[j].size = 0;           // tem necessidade de definir isso?
+				// limpando direct indirect  nao sei se isso deveria ser feito no format ou aqui
+				for (int k = 0; k < POINTERS_PER_INODE; ++k) {
+					if (inode_block.inode[j].direct[k] != 0) {
+						inode_block.inode[j].direct[k] = 0;
+					} 
+				}
+				// inode_block.inode[j].direct[POINTERS_PER_INODE] = {};
+				inode_block.inode[j].indirect = 0;
+
+				disk->write(i + 1, inode_block.data);
+				return inumber;
+			};
+		}
+	}
 	return 0;
 }
 
@@ -129,6 +161,8 @@ int INE5412_FS::fs_delete(int inumber)
 
 int INE5412_FS::fs_getsize(int inumber)
 {
+	// union fs_inode inode_target = inode_load(inumber, inode);
+	// return inode_target.size;
 	return -1;
 }
 
@@ -149,6 +183,12 @@ void INE5412_FS::inode_load( int inumber, class fs_inode *inode ) {
     i = (inumber % INODES_PER_BLOCK)-1;
     *inode = block.inode[i];
 }
+
+void INE5412_FS::inode_save(int inumber, fs_inode *inode)
+{
+
+}
+
 
 void INE5412_FS::set_bitmap_block(int number) {
 	bitmap[number] = 1;

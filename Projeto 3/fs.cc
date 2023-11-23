@@ -45,7 +45,7 @@ void INE5412_FS::fs_debug()
 			}
 		}
 	}
-	show_bitmap();
+	// show_bitmap();
 }
 
 int INE5412_FS::fs_format()
@@ -190,6 +190,30 @@ int INE5412_FS::fs_getsize(int inumber)
 
 int INE5412_FS::fs_read(int inumber, char *data, int length, int offset)
 {
+	// noooooooooooo ter minei
+	int readed_bytes = 0;
+	fs_inode inode_target;
+	inode_load(inumber, &inode_target);
+	if (inode_target.isvalid) {
+		int block_position = offset / 4096;  // disk block size
+		if (block_position < POINTERS_PER_INODE-1) {
+			cout << "aaaa" << block_position;
+			// inode_target.direct[offset];
+			// return readed_bytes;
+		}
+		// } else { }
+		int indirect = inode_target.indirect;
+		if (indirect != 0) {
+			union fs_block ind_block;
+			disk->read(indirect, ind_block.data);
+			for(const auto& block_pointer: ind_block.pointers) {
+				if (block_pointer != 0) {
+					// aaa
+				}
+			}
+		}
+		return 0;
+	}
 	return 0;
 }
 
@@ -224,8 +248,8 @@ void INE5412_FS::reset_bitmap_block(int number) {
 	bitmap[number] = 0;
 }
 
-void INE5412_FS::show_bitmap() {
-	for (int i = 0; i <= sizeof(bitmap); ++i) {
-		cout << i << ": " << bitmap[i] << "\n";
-	}
-}
+// void INE5412_FS::show_bitmap() {
+// 	for (int i = 0; i <= sizeof(bitmap); ++i) {
+// 		cout << i << ": " << bitmap[i] << "\n";
+// 	}
+// }

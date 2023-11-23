@@ -57,6 +57,9 @@ public:
     void inode_save(int inumber, class fs_inode *inode);
 
     void set_bitmap_block(int number);
+    void reset_bitmap_block(int number);
+
+    void show_bitmap();
 
 private:
     Disk *disk;

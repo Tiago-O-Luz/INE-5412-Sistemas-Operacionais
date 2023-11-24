@@ -189,7 +189,6 @@ int INE5412_FS::fs_getsize(int inumber)
 
 int INE5412_FS::fs_read(int inumber, char *data, int length, int offset)
 {
-	// noooooooooooo ter minei
 	int readed_bytes = 0;
 	fs_inode inode_target;
 	inode_load(inumber, &inode_target);
@@ -202,7 +201,9 @@ int INE5412_FS::fs_read(int inumber, char *data, int length, int offset)
 					disk->read(inode_target.direct[block_position], data);
 					readed_bytes += Disk::DISK_BLOCK_SIZE;
 				} else {
-					// Le só o restante de bits necessario e nao o bloco todo
+					int remaining_bytes = length % Disk::DISK_BLOCK_SIZE;
+					readed_bytes += remaining_bytes;
+					// lógica ta certa?
 				}
 			} else {
 				return readed_bytes;
@@ -219,7 +220,9 @@ int INE5412_FS::fs_read(int inumber, char *data, int length, int offset)
 						if ((readed_bytes + Disk::DISK_BLOCK_SIZE) < length) {
 							disk->read(block_pointer, data);
 						} else {
-							// Le só o restante de bits necessario e nao o bloco todo
+							int remaining_bytes = length % Disk::DISK_BLOCK_SIZE;
+							readed_bytes += remaining_bytes;
+							// lógica ta certa?
 						}
 					} else {
 						return readed_bytes;
@@ -268,7 +271,7 @@ void INE5412_FS::reset_bitmap_block(int number) {
 // 		if ((readed_bytes + Disk::DISK_BLOCK_SIZE) < length) {
 // 			disk->read(inode->direct[block_pos], data);
 // 		} else {
-// 			// Le só o restante de bits necessario e nao o bloco todo
+// 			// lógica ta certa?
 // 		}
 // 	} else {
 // 		return readed_bytes;

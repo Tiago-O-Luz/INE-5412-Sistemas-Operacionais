@@ -47,5 +47,9 @@
         "ctime": "cpp",
         "ratio": "cpp"
     },
-    "C_Cpp.errorSquiggles": "enabled"
+    "C_Cpp.errorSquiggles": "enabled",
+    "editor.formatOnType": true,
+    "[lisp]": {
+        "editor.wordSeparators": "`|;:'\",()"
+    }
 }

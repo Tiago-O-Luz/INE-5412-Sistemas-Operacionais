@@ -45,7 +45,6 @@ void INE5412_FS::fs_debug()
 			}
 		}
 	}
-	// show_bitmap();
 }
 
 int INE5412_FS::fs_format()
@@ -195,20 +194,36 @@ int INE5412_FS::fs_read(int inumber, char *data, int length, int offset)
 	fs_inode inode_target;
 	inode_load(inumber, &inode_target);
 	if (inode_target.isvalid) {
-		int block_position = offset / 4096;  // disk block size
-		if (block_position < POINTERS_PER_INODE-1) {
-			cout << "aaaa" << block_position;
-			// inode_target.direct[offset];
-			// return readed_bytes;
+		int block_position = offset / Disk::DISK_BLOCK_SIZE;  // disk block size
+		for (; block_position < POINTERS_PER_INODE; block_position++)
+		{
+			if (readed_bytes < length) {
+				if ((readed_bytes + Disk::DISK_BLOCK_SIZE) < length) {
+					disk->read(inode_target.direct[block_position], data);
+					readed_bytes += Disk::DISK_BLOCK_SIZE;
+				} else {
+					// Le só o restante de bits necessario e nao o bloco todo
+				}
+			} else {
+				return readed_bytes;
+			}
+			block_position++;
 		}
-		// } else { }
-		int indirect = inode_target.indirect;
-		if (indirect != 0) {
+
+		if (inode_target.indirect != 0) {
 			union fs_block ind_block;
-			disk->read(indirect, ind_block.data);
+			disk->read(inode_target.indirect, ind_block.data);
 			for(const auto& block_pointer: ind_block.pointers) {
 				if (block_pointer != 0) {
-					// aaa
+					if (readed_bytes < length) {
+						if ((readed_bytes + Disk::DISK_BLOCK_SIZE) < length) {
+							disk->read(block_pointer, data);
+						} else {
+							// Le só o restante de bits necessario e nao o bloco todo
+						}
+					} else {
+						return readed_bytes;
+					}
 				}
 			}
 		}
@@ -248,8 +263,20 @@ void INE5412_FS::reset_bitmap_block(int number) {
 	bitmap[number] = 0;
 }
 
-// void INE5412_FS::show_bitmap() {
-// 	for (int i = 0; i <= sizeof(bitmap); ++i) {
-// 		cout << i << ": " << bitmap[i] << "\n";
+// int INE5412_FS::read_block(int readed_bytes, int length, int block_pos, fs_inode *inode, char *data) {
+// 	if (readed_bytes < length) {
+// 		if ((readed_bytes + Disk::DISK_BLOCK_SIZE) < length) {
+// 			disk->read(inode->direct[block_pos], data);
+// 		} else {
+// 			// Le só o restante de bits necessario e nao o bloco todo
+// 		}
+// 	} else {
+// 		return readed_bytes;
 // 	}
 // }
+
+void INE5412_FS::show_bitmap() {
+	for (int i = 0; i <= sizeof(bitmap); ++i) {
+		cout << i << ": " << bitmap[i] << "\n";
+	}
+}

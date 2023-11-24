@@ -59,6 +59,8 @@ public:
     void set_bitmap_block(int number);
     void reset_bitmap_block(int number);
 
+    // int read_block(int readed_bytes, int length, int block_pos, fs_inode *inode, char *data);
+
     void show_bitmap();
 
 private:

@@ -62,6 +62,7 @@ public:
     // int read_block(int readed_bytes, int length, int block_pos, fs_inode *inode, char *data);
 
     void show_bitmap();
+    void print_inode(int inumber, fs_inode *inode);
 
 private:
     Disk *disk;

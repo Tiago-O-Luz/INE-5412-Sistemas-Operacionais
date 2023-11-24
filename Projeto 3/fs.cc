@@ -192,45 +192,64 @@ int INE5412_FS::fs_read(int inumber, char *data, int length, int offset)
 	int readed_bytes = 0;
 	fs_inode inode_target;
 	inode_load(inumber, &inode_target);
-	if (inode_target.isvalid) {
-		int block_position = offset / Disk::DISK_BLOCK_SIZE;  // disk block size
-		for (; block_position < POINTERS_PER_INODE; block_position++)
+	if (inode_target.isvalid && offset < inode_target.size) {
+		// cout << "inode valid\n";
+		int block_offset = offset / Disk::DISK_BLOCK_SIZE;  // disk block size
+		// cout << "offset: " << offset << "\n";
+		// cout << "block_offset: " << block_offset << "\n";
+		for (int block_position = block_offset; block_position < POINTERS_PER_INODE; block_position++)
 		{
-			if (readed_bytes < length) {
-				if ((readed_bytes + Disk::DISK_BLOCK_SIZE) < length) {
-					disk->read(inode_target.direct[block_position], data);
+			// cout << "Readed " << readed_bytes << " of " << length << " bytes" << "\n";
+			// cout << "block_position: " << block_position << " : " << inode_target.direct[block_position] << "\n";
+			
+			if (readed_bytes < length && inode_target.direct[block_position] != 0) {
+				if ((offset + readed_bytes + Disk::DISK_BLOCK_SIZE) < inode_target.size) {
+					disk->read(inode_target.direct[block_position], &data[readed_bytes]);
 					readed_bytes += Disk::DISK_BLOCK_SIZE;
-				} else {
-					int remaining_bytes = length % Disk::DISK_BLOCK_SIZE;
-					readed_bytes += remaining_bytes;
+				}
+				else {
+					// union fs_block block;
+					disk->read(inode_target.direct[block_position], &data[readed_bytes]);
+					// cout << "remaining_bytes: " << inode_target.size - (offset + readed_bytes) <<  "\n";
+					readed_bytes += inode_target.size - (offset + readed_bytes);
 					// lógica ta certa?
 				}
 			} else {
 				return readed_bytes;
 			}
-			block_position++;
 		}
 
 		if (inode_target.indirect != 0) {
+			// cout << "indirect block: " << inode_target.indirect << "\n";
 			union fs_block ind_block;
 			disk->read(inode_target.indirect, ind_block.data);
-			for(const auto& block_pointer: ind_block.pointers) {
-				if (block_pointer != 0) {
+			int p = 0;
+			if (block_offset > POINTERS_PER_INODE)
+				p = block_offset - POINTERS_PER_INODE;
+			// cout << "pointer offset: " << p << "\n";
+			for (; p < POINTERS_PER_BLOCK; p++)
+			{
+				// cout << "Readed " << readed_bytes << " of " << length << " bytes" << "\n";
+				if (ind_block.pointers[p] != 0) {
 					if (readed_bytes < length) {
-						if ((readed_bytes + Disk::DISK_BLOCK_SIZE) < length) {
-							disk->read(block_pointer, data);
+						if ((offset + readed_bytes + Disk::DISK_BLOCK_SIZE) < inode_target.size) {
+							disk->read(ind_block.pointers[p], &data[readed_bytes]);
+							readed_bytes += Disk::DISK_BLOCK_SIZE;
 						} else {
-							int remaining_bytes = length % Disk::DISK_BLOCK_SIZE;
-							readed_bytes += remaining_bytes;
+							disk->read(ind_block.pointers[p], &data[readed_bytes]);
+							// cout << "remaining_bytes: " << inode_target.size - (offset + readed_bytes) <<  "\n";
+							readed_bytes += inode_target.size - (offset + readed_bytes);
 							// lógica ta certa?
 						}
 					} else {
 						return readed_bytes;
 					}
+				} else {
+					return readed_bytes;
 				}
 			}
 		}
-		return 0;
+		return readed_bytes;
 	}
 	return 0;
 }

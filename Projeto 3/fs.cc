@@ -33,7 +33,7 @@ int INE5412_FS::fs_format()
 		union fs_block inode_block;
 		union fs_block super_block;
 		
-		disk->read(0, super_block.data);	// Read super block
+		disk->read(0, super_block.data);	// Read superblock
 		
 		if (super_block.super.magic == FS_MAGIC) {
 			// If disk has file system
@@ -46,58 +46,50 @@ int INE5412_FS::fs_format()
 				disk->write(i + 1, inode_block.data);	// Write erased block
 			}
 		}
-		super_block.super.ninodeblocks = ceil(disk->size()*0.1);
-		super_block.super.nblocks = disk->size();
+		// Set super block
+		super_block.super.ninodeblocks = ceil(disk->size()*0.1);	// Aloccate 10% of disk to inode blocks
+		super_block.super.nblocks = disk->size();					// Set number of blocks
 		super_block.super.ninodes = 0;
 		super_block.super.magic = FS_MAGIC;
 
-		disk->write(0, super_block.data);
+		disk->write(0, super_block.data);	// Write new super block
 
 		return 1;
 	}
+	cout << "ERROR: Disk already mounted\n";
 	return 0;
 }
 
 int INE5412_FS::fs_mount()
 {
 	union fs_block block;
-	disk->read(0, block.data);
+	disk->read(0, block.data);	// Read superblock
 
 	if(block.super.magic == FS_MAGIC) {
+		// If disk has file system
 		int nblocks = block.super.nblocks;
 		int ninodeblocks = block.super.ninodeblocks;
-		bitmap = new int[nblocks]{0};
 
+		bitmap = new int[nblocks]{0};	// Create new bitmap
+
+		// Set to 1 superblock and inode blocks positions in the bitmap
 		for (int i = 0; i < ninodeblocks+1; ++i) {
 			set_bitmap_block(i);
 		}
 
 		union fs_block inode_block;
-		union fs_block ind_block;
+		// Iterate by every inode in every block 
 		for (int i = 0; i < ninodeblocks; i++) {
 			disk->read(i+1, inode_block.data);
 			for (int j = 0; j < INODES_PER_BLOCK; j++) {
-				if (inode_block.inode[j].isvalid == 1) {
-					for (const auto& direct_block: inode_block.inode[j].direct) {
-						set_bitmap_block(direct_block);
-					}
-					int indirect = inode_block.inode[j].indirect;
-					if (indirect != 0) {
-						set_bitmap_block(indirect);
-						disk->read(indirect, ind_block.data);
-						for(const auto& block_pointer: ind_block.pointers) {
-							set_bitmap_block(block_pointer);
-						}
-					}
-				}
+				set_inode_bitmap_info(&inode_block.inode[j]);	// Set inode on bitmap
 			}
-		}
-		// for (int i = 0; i < nblocks; ++i) {
-		// 	cout << i << ": " << bitmap[i] << "\n";
-		// }
+		};
+		// show_bitmap(nblocks);
 		is_mounted = true;
 		return 1;
 	}
+	cout << "ERROR: No file system found\n";
 	return 0;
 }
 
@@ -273,6 +265,25 @@ void INE5412_FS::reset_bitmap_block(int number) {
 	bitmap[number] = 0;
 }
 
+void INE5412_FS::set_inode_bitmap_info(fs_inode *inode) {
+	if (inode->isvalid == 1) {
+		// Set every direct block  
+		for (const auto& direct_block: inode->direct) {
+			set_bitmap_block(direct_block);
+		}
+		int indirect = inode->indirect;
+		if (indirect != 0) {
+			union fs_block ind_block;
+			set_bitmap_block(indirect);				// Set indirect block  
+			disk->read(indirect, ind_block.data);	// Read indirect block
+			// Set every block in indirect block  
+			for(const auto& block_pointer: ind_block.pointers) {
+				set_bitmap_block(block_pointer);
+			}
+		}
+	}
+}
+
 // int INE5412_FS::read_block(int readed_bytes, int length, int block_pos, fs_inode *inode, char *data) {
 // 	if (readed_bytes < length) {
 // 		if ((readed_bytes + Disk::DISK_BLOCK_SIZE) < length) {
@@ -285,8 +296,9 @@ void INE5412_FS::reset_bitmap_block(int number) {
 // 	}
 // }
 
-void INE5412_FS::show_bitmap() {
-	for (int i = 0; i <= sizeof(bitmap); ++i) {
+void INE5412_FS::show_bitmap(int array_size) {
+	for (int i = 0; i < array_size; ++i)
+	{
 		cout << i << ": " << bitmap[i] << "\n";
 	}
 }

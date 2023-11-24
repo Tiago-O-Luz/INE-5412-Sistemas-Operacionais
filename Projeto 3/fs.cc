@@ -118,6 +118,9 @@ int INE5412_FS::fs_create()
 				};
 			}
 		}
+		cout << "ERROR: can't create new inode. inode table full\n";
+	} else {
+		cout << "ERROR: disk must be mounted first!\n";
 	}
 	return 0;
 }
@@ -126,20 +129,25 @@ int INE5412_FS::fs_delete(int inumber)
 {
 	if (is_mounted) {
 		fs_inode inode;
-		inode_load(inumber, &inode);
-		if (inode.isvalid) {		
+		inode_load(inumber, &inode);	// Load inode
+		if (inode.isvalid) {
+			// Iterate by every direct pointer and reset blocks in bitmap
 			for (int k = 0; k < POINTERS_PER_INODE; ++k) {
-				if (inode.direct[k] != 0) {
+				if (inode.direct[k]) {
 					reset_bitmap_block(inode.direct[k]);
 				}
 			}
-			if (inode.indirect != 0) {
+			if (inode.indirect) {
 				reset_bitmap_block(inode.indirect);
 			}
 			inode.isvalid = 0;
-			inode_save(inumber, &inode);
+			inode_save(inumber, &inode);	// Save inode
 			return 1;
+		} else {
+			cout << "ERROR: inode is not valid!\n";
 		}
+	} else {
+		cout << "ERROR: disk must be mounted first!\n";
 	}
 	return 0;
 }
@@ -220,7 +228,7 @@ int INE5412_FS::fs_read(int inumber, char *data, int length, int offset)
 			return readed_bytes;
 		}
 	} else {
-		cout << "ERROR: disk not mounted\n";
+		cout << "ERROR: disk must be mounted first!\n";
 	}
 	return 0;
 }

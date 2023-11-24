@@ -22,7 +22,7 @@ void INE5412_FS::fs_debug()
 	for (int i = 0; i < block.super.ninodeblocks; i++) {
 		disk->read(i+1, inode_block.data);	// Read inode block
 		for (int j = 0; j < INODES_PER_BLOCK; j++) {
-			print_inode(((j + 1) * (i) + (j + 1)), &inode_block.inode[j]);
+			print_inode(get_inumber(i, j), &inode_block.inode[j]);
 		}
 	}
 }
@@ -99,30 +99,21 @@ int INE5412_FS::fs_create()
 		union fs_block inode_block;
 		union fs_block super_block;
 
-		disk->read(0, super_block.data);
-		int inumber = 0;
+		disk->read(0, super_block.data);	// Read superblock
+
+		// Iterate by every inode in every block 
 		for (int i = 0; i < super_block.super.ninodeblocks; i++)
 		{
 			disk->read(i + 1, inode_block.data);
 			for (int j = 0; j < INODES_PER_BLOCK; j++)
 			{
-				cout << (j + 1) * (i) + (j+1) << ": " << inode_block.inode[j].isvalid << "\n";
+				// cout << get_inumber(i, j) << ": " << inode_block.inode[j].isvalid << "\n";
 				if (!inode_block.inode[j].isvalid)
 				{
-
-					inumber = (j + 1) * (i) + (j+1);		// nao entendi mto bem como definir o inumber só sei q ele n pode ser 0
-					inode_block.inode[j].isvalid = 1;
-					inode_block.inode[j].size = 0;           // tem necessidade de definir isso?
-					// limpando direct indirect  nao sei se isso deveria ser feito no format ou aqui
-					for (int k = 0; k < POINTERS_PER_INODE; ++k) {
-						if (inode_block.inode[j].direct[k] != 0) {
-							inode_block.inode[j].direct[k] = 0;
-						} 
-					}
-					// inode_block.inode[j].direct[POINTERS_PER_INODE] = {};
-					inode_block.inode[j].indirect = 0;
-
-					disk->write(i + 1, inode_block.data);
+					// // If inode is available
+					int inumber = get_inumber(i, j);		// Find inumber
+					prepare_inode(inumber, &inode_block.inode[j]);
+					disk->write(i + 1, inode_block.data);	// Writes inode block data
 					return inumber;
 				};
 			}
@@ -284,6 +275,17 @@ void INE5412_FS::set_inode_bitmap_info(fs_inode *inode) {
 	}
 }
 
+void INE5412_FS::prepare_inode(int inumber, fs_inode *inode) {
+	inode->isvalid = 1;
+	inode->size = 0;
+
+	// Clean direct blocks
+	for (int k = 0; k < POINTERS_PER_INODE; ++k) {
+		inode->direct[k] = 0; 
+	}
+	// Clean indirect block (This implies that an allocated indirect block must be cleaned first)
+	inode->indirect = 0;
+}
 // int INE5412_FS::read_block(int readed_bytes, int length, int block_pos, fs_inode *inode, char *data) {
 // 	if (readed_bytes < length) {
 // 		if ((readed_bytes + Disk::DISK_BLOCK_SIZE) < length) {
@@ -330,4 +332,8 @@ void INE5412_FS::print_inode(int inumber, fs_inode *inode) {
 		}
 		cout << "\n";
 	}
+}
+
+int INE5412_FS::get_inumber(int i, int j) {
+	return (j + 1) * (i) + (j + 1);
 }

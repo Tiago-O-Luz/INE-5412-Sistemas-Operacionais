@@ -85,7 +85,6 @@ int INE5412_FS::fs_mount()
 				set_inode_bitmap_info(&inode_block.inode[j]);	// Set inode on bitmap
 			}
 		};
-		show_bitmap(nblocks);
 		is_mounted = true;
 		return 1;
 	}
@@ -168,57 +167,41 @@ int INE5412_FS::fs_read(int inumber, char *data, int length, int offset)
 		int readed_bytes = 0;
 		fs_inode inode_target;
 		inode_load(inumber, &inode_target);
+		
 		if (inode_target.isvalid && offset < inode_target.size) {
-			// cout << "inode valid\n";
-			int block_offset = offset / Disk::DISK_BLOCK_SIZE;  // disk block size
-			// cout << "offset: " << offset << "\n";
-			// cout << "block_offset: " << block_offset << "\n";
-			for (int block_position = block_offset; block_position < POINTERS_PER_INODE; block_position++)
-			{
-				// cout << "Readed " << readed_bytes << " of " << length << " bytes" << "\n";
-				// cout << "block_position: " << block_position << " : " << inode_target.direct[block_position] << "\n";
-				
+			int block_offset = offset / Disk::DISK_BLOCK_SIZE;  // Block where the read process starts
+			
+			for (int block_position = block_offset; block_position < POINTERS_PER_INODE; block_position++) {
+				// Iterate by every direct block
 				if (readed_bytes < length && inode_target.direct[block_position] != 0) {
-					if ((offset + readed_bytes + Disk::DISK_BLOCK_SIZE) < inode_target.size) {
-						disk->read(inode_target.direct[block_position], &data[readed_bytes]);
-						readed_bytes += Disk::DISK_BLOCK_SIZE;
-					}
-					else {
-						// union fs_block block;
-						disk->read(inode_target.direct[block_position], &data[readed_bytes]);
-						// cout << "remaining_bytes: " << inode_target.size - (offset + readed_bytes) <<  "\n";
-						readed_bytes += inode_target.size - (offset + readed_bytes);
-						// lógica ta certa?
-					}
+					// If length or end of file hasn't been reached continue to read
+
+					// Adds block data to data buffer
+					disk->read(inode_target.direct[block_position], &data[readed_bytes]);
+					increase_byte_count((offset + readed_bytes), inode_target.size, &readed_bytes);
+
 				} else {
 					return readed_bytes;
 				}
 			}
 
 			if (inode_target.indirect != 0) {
-				// cout << "indirect block: " << inode_target.indirect << "\n";
 				union fs_block ind_block;
-				disk->read(inode_target.indirect, ind_block.data);
+				disk->read(inode_target.indirect, ind_block.data);	// Read indirect block
+
 				int p = 0;
-				if (block_offset > POINTERS_PER_INODE)
-					p = block_offset - POINTERS_PER_INODE;
-				// cout << "pointer offset: " << p << "\n";
+				if (block_offset > POINTERS_PER_INODE) p = block_offset - POINTERS_PER_INODE;
+
 				for (; p < POINTERS_PER_BLOCK; p++)
 				{
-					// cout << "Readed " << readed_bytes << " of " << length << " bytes" << "\n";
+					// Iterate by every pointer in indirect block
 					if (ind_block.pointers[p] != 0) {
+						// If hasn't reached end of file
 						if (readed_bytes < length) {
-							if ((offset + readed_bytes + Disk::DISK_BLOCK_SIZE) < inode_target.size) {
-								disk->read(ind_block.pointers[p], &data[readed_bytes]);
-								readed_bytes += Disk::DISK_BLOCK_SIZE;
-							} else {
-								disk->read(ind_block.pointers[p], &data[readed_bytes]);
-								// cout << "remaining_bytes: " << inode_target.size - (offset + readed_bytes) <<  "\n";
-								readed_bytes += inode_target.size - (offset + readed_bytes);
-								// lógica ta certa?
-							}
+							disk->read(ind_block.pointers[p], &data[readed_bytes]);
+							increase_byte_count((offset + readed_bytes), inode_target.size, &readed_bytes);
 						} else {
-							return readed_bytes;
+							break;
 						}
 					} else {
 						return readed_bytes;
@@ -237,39 +220,55 @@ int INE5412_FS::fs_write(int inumber, const char *data, int length, int offset)
 {
 	if (is_mounted) {
 		union fs_block block;
-		disk->read(0, block.data);
+		disk->read(0, block.data);	// Read superblock
 		int nblocks = block.super.nblocks;
 
 		int writed_bytes = 0;
 		fs_inode inode_target;
 		inode_load(inumber, &inode_target);
 		if (inode_target.isvalid) {
-			int block_offset = offset / Disk::DISK_BLOCK_SIZE;
+			int block_offset = offset / Disk::DISK_BLOCK_SIZE;	// Block where the read process starts
 			
-			for (int block_position = block_offset; block_position < POINTERS_PER_INODE; block_position) {
-				if (writed_bytes < length && inode_target.direct[block_position] == 0) {
-					int free_block = get_free_block_bitmap(nblocks);
-					if (free_block == -1) {			// se nao tiver bloco livre só retorna oq foi escrito ate o momento
+			for (int block_position = block_offset; block_position < POINTERS_PER_INODE; block_position++) {
+				// Iterate by every direct block
+
+				if (writed_bytes < length) {
+					// If length hasn't been reached continue to write
+					
+					// Allocates block if necessary
+					int free_block = allocate_block(&inode_target.direct[block_position], nblocks, &inode_target);
+					if (free_block == -1) {			
+						// If no block is free returns with what was written
+						inode_save(inumber, &inode_target);
 						return writed_bytes;
 					}
-					inode->direct[block_position] = free_block;
-					set_bitmap_block(free_block);
+					
+					// Write data buffer to in block
 					disk->write(inode_target.direct[block_position], &data[writed_bytes]);
-					writed_bytes += inode_target.size - (offset + writed_bytes);
+					increase_byte_count(writed_bytes, length, &inode_target.size);	// Set new size in inode
+					increase_byte_count(writed_bytes, length, &writed_bytes);
+
+				} else {
+					inode_save(inumber, &inode_target);
+					return writed_bytes;
 				}
 			}
 
-			if (writed_bytes < length && inode_target.indirect == 0) { // caso n tenha nenhum bloco indireto
-				int free_block = get_free_block_bitmap(nblocks);
+			if (writed_bytes < length && inode_target.indirect == 0) { 
+				// If inode doesn't have indirect block
+
+				int free_block = allocate_block(&inode_target.indirect, nblocks, &inode_target);
 				if (free_block == -1) {			// se nao tiver bloco livre só retorna oq foi escrito ate o momento
+					inode_save(inumber, &inode_target);
 					return writed_bytes;
 				}
 				clean_block(free_block);
-				inode->indirect = free_block;
-				set_bitmap_block(free_block);
 			}
 
 			if (writed_bytes < length && inode_target.indirect != 0) {
+				// If length hasn't been reached continue to write
+
+				//Load indirect block
 				union fs_block ind_block;
 				disk->read(inode_target.indirect, ind_block.data);
 
@@ -278,30 +277,35 @@ int INE5412_FS::fs_write(int inumber, const char *data, int length, int offset)
 					p = block_offset - POINTERS_PER_INODE;
 				}
 				for (; p < POINTERS_PER_BLOCK; p++) {
+					// Iterate by every indirect block
 					if (writed_bytes < length) {
-						if ((offset + writed_bytes + Disk::DISK_BLOCK_SIZE) < inode_target.size) {
-							int free_block = get_free_block_bitmap(nblocks);
-							if (free_block == -1) {			// se nao tiver bloco livre só retorna oq foi escrito ate o momento
-								return writed_bytes;
-							}
-							inode->indirect = free_block;
-							set_bitmap_block(free_block);
-							ind_block.pointers[p] = free_block;
+					// If length hasn't been reached continue to write
 
-							disk->write(ind_block.pointers[p], &data[writed_bytes]);
-							writed_bytes += Disk::DISK_BLOCK_SIZE;
-						} else {
-							disk->write(ind_block.pointers[p], &data[writed_bytes]);
-							writed_bytes += inode_target.size - (offset + writed_bytes);
+						// Allocates block if necessary
+						int free_block = allocate_block(&ind_block.pointers[p], nblocks, &inode_target);
+						if (free_block == -1) {
+							// If no block is free break
+							break;
 						}
+
+						disk->write(ind_block.pointers[p], &data[writed_bytes]);
+						increase_byte_count(writed_bytes, length, &inode_target.size);
+						increase_byte_count(writed_bytes, length, &writed_bytes);
 					} else {
-						return writed_bytes;
+						break;
 					}
 				}
+				// Saves inode and indirect block
+				inode_save(inumber, &inode_target);
+				disk->write(inode_target.indirect, ind_block.data);
 			}
+			inode_save(inumber, &inode_target);
 			return writed_bytes;
-
+		} else {
+			cout << "ERROR: inode number not valid!\n";
 		}
+	} else {
+		cout << "ERROR: disk must be mounted first!\n";
 	}
 	return 0;
 }
@@ -362,17 +366,6 @@ void INE5412_FS::prepare_inode(int inumber, fs_inode *inode) {
 	// Clean indirect block (This implies that an allocated indirect block must be cleaned first)
 	inode->indirect = 0;
 }
-// int INE5412_FS::read_block(int readed_bytes, int length, int block_pos, fs_inode *inode, char *data) {
-// 	if (readed_bytes < length) {
-// 		if ((readed_bytes + Disk::DISK_BLOCK_SIZE) < length) {
-// 			disk->read(inode->direct[block_pos], data);
-// 		} else {
-// 			// lógica ta certa?
-// 		}
-// 	} else {
-// 		return readed_bytes;
-// 	}
-// }
 
 void INE5412_FS::show_bitmap(int array_size) {
 	for (int i = 0; i < array_size; ++i)
@@ -414,8 +407,8 @@ int INE5412_FS::get_inumber(int i, int j) {
 	return (j + 1) * (i) + (j + 1);
 }
 
-int INE5412_FS::get_free_block_bitmap(int array_size) {
-	for (int i = 0; i < array_size; i++) {
+int INE5412_FS::get_block(int array_size) {
+	for (int i = 1; i < array_size; i++) {
 		if (bitmap[i] == 0) {
 			return i;
 		}
@@ -432,4 +425,23 @@ void INE5412_FS::clean_block(int bnumber) {
 	}
 
 	disk->write(bnumber, block.data);
+}
+
+int INE5412_FS::allocate_block(int *block, int nblocks, fs_inode *inode) {
+	if (*block == 0) {
+		int free_block = get_block(nblocks);
+		cout << "Free block: " << free_block << "\n";
+		*block = free_block;
+		set_bitmap_block(free_block);
+		return free_block;
+	}
+	return -1;
+}
+
+void INE5412_FS::increase_byte_count(int cmp_value, int limit, int *byte_count) {
+	if ((cmp_value + Disk::DISK_BLOCK_SIZE) < limit) {
+		*byte_count += Disk::DISK_BLOCK_SIZE;	// Count block size
+	} else {
+		*byte_count += limit - cmp_value;	// Count only the remaining bytes
+	}
 }

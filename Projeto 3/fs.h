@@ -66,9 +66,11 @@ public:
     void show_bitmap(int array_size);
     void print_inode(int inumber, fs_inode *inode);
     int  get_inumber(int i, int j);
-    int get_free_block_bitmap(int array_size);
 
+    int  get_block(int array_size);
     void clean_block(int bnumber);
+    int  allocate_block(int *block, int nblocks, fs_inode *inode);
+    void increase_byte_count(int cmp_value, int limit, int *byte_count);
 
 private:
     Disk *disk;

@@ -430,10 +430,12 @@ void INE5412_FS::clean_block(int bnumber) {
 int INE5412_FS::allocate_block(int *block, int nblocks, fs_inode *inode) {
 	if (*block == 0) {
 		int free_block = get_block(nblocks);
-		cout << "Free block: " << free_block << "\n";
-		*block = free_block;
-		set_bitmap_block(free_block);
-		return free_block;
+		if (free_block != -1) {
+			cout << "Free block: " << free_block << "\n";
+			*block = free_block;
+			set_bitmap_block(free_block);
+			return free_block;
+		}
 	}
 	return -1;
 }

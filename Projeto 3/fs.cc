@@ -434,10 +434,10 @@ int INE5412_FS::allocate_block(int *block, int nblocks, fs_inode *inode) {
 			cout << "Free block: " << free_block << "\n";
 			*block = free_block;
 			set_bitmap_block(free_block);
-			return free_block;
 		}
+		return free_block;
 	}
-	return -1;
+	return 0;
 }
 
 void INE5412_FS::increase_byte_count(int cmp_value, int limit, int *byte_count) {

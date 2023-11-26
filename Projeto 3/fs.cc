@@ -229,6 +229,7 @@ int INE5412_FS::fs_write(int inumber, const char *data, int length, int offset)
 		if (inode_target.isvalid) {
 			int block_offset = offset / Disk::DISK_BLOCK_SIZE;	// Block where the read process starts
 			
+			//clean_inode(block_offset, true, &inode_target);
 			for (int block_position = block_offset; block_position < POINTERS_PER_INODE; block_position++) {
 				// Iterate by every direct block
 
@@ -249,6 +250,7 @@ int INE5412_FS::fs_write(int inumber, const char *data, int length, int offset)
 					increase_byte_count(writed_bytes, length, &writed_bytes);
 
 				} else {
+					clean_inode(block_position, true, &inode_target);
 					inode_save(inumber, &inode_target);
 					return writed_bytes;
 				}
@@ -262,7 +264,7 @@ int INE5412_FS::fs_write(int inumber, const char *data, int length, int offset)
 					inode_save(inumber, &inode_target);
 					return writed_bytes;
 				}
-				clean_block(free_block);
+				clean_block(free_block, 0);
 			}
 
 			if (writed_bytes < length && inode_target.indirect != 0) {
@@ -295,6 +297,7 @@ int INE5412_FS::fs_write(int inumber, const char *data, int length, int offset)
 						break;
 					}
 				}
+				clean_inode(p, false, &inode_target);
 				// Saves inode and indirect block
 				inode_save(inumber, &inode_target);
 				disk->write(inode_target.indirect, ind_block.data);
@@ -416,12 +419,16 @@ int INE5412_FS::get_block(int array_size) {
 	return -1;
 }
 
-void INE5412_FS::clean_block(int bnumber) {
+void INE5412_FS::clean_block(int bnumber, int position) {
 	union fs_block block;
 	disk->read(bnumber, block.data);
 
-	for (int i = 0; i < POINTERS_PER_BLOCK; ++i) {
-		block.pointers[i] = 0;
+	for (; position < POINTERS_PER_BLOCK; ++position) {
+		int pointer_block = block.pointers[position];
+		if (pointer_block != 0) {
+			reset_bitmap_block(pointer_block);
+		}
+		block.pointers[position] = 0;
 	}
 
 	disk->write(bnumber, block.data);
@@ -435,9 +442,12 @@ int INE5412_FS::allocate_block(int *block, int nblocks, fs_inode *inode) {
 			*block = free_block;
 			set_bitmap_block(free_block);
 			return free_block;
+		} else { 											// mexi aqui 
+			return -1;
 		}
 	}
-	return -1;
+	return 0;
+
 }
 
 void INE5412_FS::increase_byte_count(int cmp_value, int limit, int *byte_count) {
@@ -445,5 +455,22 @@ void INE5412_FS::increase_byte_count(int cmp_value, int limit, int *byte_count) 
 		*byte_count += Disk::DISK_BLOCK_SIZE;	// Count block size
 	} else {
 		*byte_count += limit - cmp_value;	// Count only the remaining bytes
+	}
+}
+
+void INE5412_FS::clean_inode(int position, bool isDirect, fs_inode *inode) {
+	int indirect_inode = inode->indirect;
+	if (isDirect) {
+		for (; position < POINTERS_PER_INODE; position++) {
+			if (inode->direct[position]) {
+				reset_bitmap_block(inode->direct[position]);
+			}
+			inode->direct[position] = 0;
+		}
+		if (indirect_inode != 0){
+			clean_block(indirect_inode, 0);
+		}
+	} else if (indirect_inode != 0) {
+		clean_block(indirect_inode, position);
 	}
 }

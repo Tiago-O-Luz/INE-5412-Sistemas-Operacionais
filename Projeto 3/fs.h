@@ -68,9 +68,10 @@ public:
     int  get_inumber(int i, int j);
 
     int  get_block(int array_size);
-    void clean_block(int bnumber);
+    void clean_block(int bnumber, int position);
     int  allocate_block(int *block, int nblocks, fs_inode *inode);
     void increase_byte_count(int cmp_value, int limit, int *byte_count);
+    void clean_inode(int position, bool isDirect, fs_inode *inode);
 
 private:
     Disk *disk;

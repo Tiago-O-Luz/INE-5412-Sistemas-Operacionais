@@ -61,8 +61,6 @@ public:
     void set_inode_bitmap_info(fs_inode *inode);
     void prepare_inode(int inumber, fs_inode *inode);
 
-    // int read_block(int readed_bytes, int length, int block_pos, fs_inode *inode, char *data);
-
     void show_bitmap(int array_size);
     void print_inode(int inumber, fs_inode *inode);
     int  get_inumber(int i, int j);

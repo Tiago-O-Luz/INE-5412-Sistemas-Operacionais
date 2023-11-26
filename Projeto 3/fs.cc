@@ -1,6 +1,5 @@
 #include "fs.h"
 #include <math.h>
-// #include <vector>
 
 void INE5412_FS::fs_debug()
 {
@@ -106,7 +105,6 @@ int INE5412_FS::fs_create()
 			disk->read(i + 1, inode_block.data);
 			for (int j = 0; j < INODES_PER_BLOCK; j++)
 			{
-				// cout << get_inumber(i, j) << ": " << inode_block.inode[j].isvalid << "\n";
 				if (!inode_block.inode[j].isvalid)
 				{
 					// // If inode is available
@@ -297,7 +295,6 @@ int INE5412_FS::fs_write(int inumber, const char *data, int length, int offset)
 						break;
 					}
 				}
-				// clean_inode(p+POINTERS_PER_INODE, &inode_target);
 				// Saves inode and indirect block
 				disk->write(inode_target.indirect, ind_block.data);
 			}
@@ -438,7 +435,6 @@ int INE5412_FS::allocate_block(int *block, int nblocks, fs_inode *inode) {
 	if (*block == 0) {
 		int free_block = get_block(nblocks);
 		if (free_block != -1) {
-			// cout << "Free block: " << free_block << "\n";
 			*block = free_block;
 			set_bitmap_block(free_block);
 			return free_block;

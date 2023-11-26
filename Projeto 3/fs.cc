@@ -445,6 +445,7 @@ int INE5412_FS::allocate_block(int *block, int nblocks, fs_inode *inode) {
 		} else { 											// mexi aqui 
 			return -1;
 		}
+		return free_block;
 	}
 	return 0;
 

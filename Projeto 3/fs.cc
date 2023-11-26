@@ -426,7 +426,7 @@ void INE5412_FS::clean_block(int bnumber, int position) {
 
 	for (; position < POINTERS_PER_BLOCK; ++position) {
 		int pointer_block = block.pointers[position];
-		if (pointer_block < superblock.super.nblocks) {
+		if (pointer_block < superblock.super.nblocks && pointer_block) {
 			reset_bitmap_block(pointer_block);
 		}
 		block.pointers[position] = 0;
@@ -468,12 +468,12 @@ void INE5412_FS::clean_inode(int position, fs_inode *inode) {
 				inode->direct[position] = 0;
 			}
 		}
-	}
-	position -= POINTERS_PER_INODE;
-	int indirect_inode = inode->indirect;
-	if (indirect_inode != 0){
-		clean_block(indirect_inode, position);
-		inode->indirect = 0;
+		position -= POINTERS_PER_INODE;
+		int indirect_inode = inode->indirect;
+		if (indirect_inode != 0){
+			clean_block(indirect_inode, position);
+			inode->indirect = 0;
+		}
 	}
 	
 }
